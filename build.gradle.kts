@@ -69,44 +69,49 @@ subprojects {
 
     afterEvaluate {
         val isAndroidModule = plugins.hasPlugin("com.android.application") || plugins.hasPlugin("com.android.library")
+        val isKotlinModule = plugins.hasPlugin("org.jetbrains.kotlin.jvm") || plugins.hasPlugin("org.jetbrains.kotlin.android")
         
-        val jacocoTask = if (tasks.findByName("jacocoTestReport") == null) {
-            tasks.register<JacocoReport>("jacocoTestReport")
-        } else {
-            tasks.named<JacocoReport>("jacocoTestReport")
-        }
-
-        jacocoTask.configure {
-            reports {
-                xml.required.set(true)
-                html.required.set(true)
+        if (isAndroidModule || isKotlinModule) {
+            val jacocoTask = if (tasks.findByName("jacocoTestReport") == null) {
+                tasks.register<JacocoReport>("jacocoTestReport")
+            } else {
+                tasks.named<JacocoReport>("jacocoTestReport")
             }
 
-            if (isAndroidModule) {
-                dependsOn("testDebugUnitTest")
-                val debugTree = fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/debug")) {
-                    exclude(jacocoTestReportExcludes)
+            jacocoTask.configure {
+                reports {
+                    xml.required.set(true)
+                    html.required.set(true)
                 }
-                val mainSrc = "${project.projectDir}/src/main/java"
-                val kotlinSrc = "${project.projectDir}/src/main/kotlin"
 
-                sourceDirectories.setFrom(files(mainSrc, kotlinSrc))
-                classDirectories.setFrom(files(debugTree))
-                executionData.setFrom(fileTree(layout.buildDirectory) {
-                    include("jacoco/testDebugUnitTest.exec")
-                })
-            } else {
-                dependsOn("test")
-                val classTree = fileTree(layout.buildDirectory.dir("classes/kotlin/main")) {
-                    exclude(jacocoTestReportExcludes)
+                if (isAndroidModule) {
+                    dependsOn("testDebugUnitTest")
+                    val debugTree = fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/debug")) {
+                        exclude(jacocoTestReportExcludes)
+                    }
+                    val mainSrc = "${project.projectDir}/src/main/java"
+                    val kotlinSrc = "${project.projectDir}/src/main/kotlin"
+
+                    sourceDirectories.setFrom(files(mainSrc, kotlinSrc))
+                    classDirectories.setFrom(files(debugTree))
+                    executionData.setFrom(fileTree(layout.buildDirectory) {
+                        include("jacoco/testDebugUnitTest.exec")
+                    })
+                } else {
+                    if (tasks.findByName("test") != null) {
+                        dependsOn("test")
+                        val classTree = fileTree(layout.buildDirectory.dir("classes/kotlin/main")) {
+                            exclude(jacocoTestReportExcludes)
+                        }
+                        val mainSrc = "${project.projectDir}/src/main/kotlin"
+
+                        sourceDirectories.setFrom(files(mainSrc))
+                        classDirectories.setFrom(files(classTree))
+                        executionData.setFrom(fileTree(layout.buildDirectory) {
+                            include("jacoco/test.exec")
+                        })
+                    }
                 }
-                val mainSrc = "${project.projectDir}/src/main/kotlin"
-
-                sourceDirectories.setFrom(files(mainSrc))
-                classDirectories.setFrom(files(classTree))
-                executionData.setFrom(fileTree(layout.buildDirectory) {
-                    include("jacoco/test.exec")
-                })
             }
         }
     }
