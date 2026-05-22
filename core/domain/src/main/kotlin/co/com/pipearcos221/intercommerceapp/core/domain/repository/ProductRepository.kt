@@ -9,5 +9,5 @@ interface ProductRepository {
 
     fun getProductById(productId: Int): Flow<Product?>
 
-    suspend fun syncProducts()
+    suspend fun syncProducts(): Result<Unit>
 }

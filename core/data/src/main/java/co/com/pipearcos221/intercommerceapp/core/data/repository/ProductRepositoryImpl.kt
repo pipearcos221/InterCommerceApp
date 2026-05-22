@@ -9,13 +9,11 @@ import co.com.pipearcos221.intercommerceapp.core.network.api.ProductApiService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 /**
  * Implementación del Repositorio de Productos.
- * Sigue el patrón Offline-First (SSOT): la UI solo observa cambios de la DB local.
+ * Maneja el flujo de datos entre la API y la base de datos local.
  */
 class ProductRepositoryImpl @Inject constructor(
     private val productDao: ProductDao,
@@ -34,19 +32,15 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun syncProducts() {
-        try {
+    override suspend fun syncProducts(): Result<Unit> {
+        return try {
             val response = apiService.getProducts()
             val entities = response.products.map { it.toEntity() }
             productDao.insertProducts(entities)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } catch (e: HttpException) {
-            e.printStackTrace()
-        } catch (e: CancellationException) {
-            throw e
+            Result.success(Unit)
         } catch (e: Exception) {
-            e.printStackTrace()
+            if (e is CancellationException) throw e
+            Result.failure(e)
         }
     }
 }
