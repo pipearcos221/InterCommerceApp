@@ -74,7 +74,7 @@ class ProductRepositoryImplTest {
     }
 
     @Test
-    fun `given api failure with IOException when syncProducts then handle exception silently and do not call dao`() = runTest {
+    fun `given api failure when syncProducts then handle silently and do not call dao`() = runTest {
         // Given
         coEvery { apiService.getProducts() } throws IOException("No network")
 
