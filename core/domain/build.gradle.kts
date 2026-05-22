@@ -8,9 +8,12 @@ java {
 }
 
 dependencies {
-    // Kotlin Coroutines for Flow
+    // Inyección de dependencias (JSR-330) para constructor injection en Domain
+    compileOnly(libs.javax.inject)
+
+    // Kotlin Coroutines para el manejo de Flows y procesos asíncronos en UseCases
     implementation(libs.kotlinx.coroutines.core)
 
-    // For Unit tests
+    // Unit Testing
     testImplementation(libs.junit)
 }
