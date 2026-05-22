@@ -1,0 +1,69 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+  weights:
+    # complexity: 2
+    # LongParameterList: 1
+    # style: 1
+    # comments: 1
+
+complexity:
+  active: true
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 20
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+    thresholdInEnums: 15
+  LongParameterList:
+    active: true
+    functionThreshold: 6
+    constructorThreshold: 7
+  LargeClass:
+    active: true
+    threshold: 150
+
+naming:
+  active: true
+  FunctionNaming:
+    active: true
+    functionPattern: '[a-z][a-zA-Z0-9]*'
+    excludeClassPattern: '.*'
+    ignoreAnnotated: ['Composable']
+  ClassNaming:
+    active: true
+    classPattern: '[A-Z][a-zA-Z0-9]*'
+  VariableNaming:
+    active: true
+    variablePattern: '[a-z][a-zA-Z0-9]*'
+
+style:
+  active: true
+  UnusedPrivateMember:
+    active: true
+  MagicNumber:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
+    ignoreNumbers: ['-1', '0', '1', '2']
+    ignorePropertyDeclaration: true
+    ignoreAnnotation: true
+    ignoreEnums: true
+  WildcardImport:
+    active: true
+    excludeImports: ['kotlinx.android.synthetic.*', 'androidx.compose.ui.graphics.vector.*']
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+
+potential-bugs:
+  active: true
+  UnsafeCallOnNullableType: # Prohibition of !! (Rule 4 in AI_RULES)
+    active: true
+  NullCheckOnMutableProperty:
+    active: true
+
+performance:
+  active: true
+  SpreadOperator:
+    active: true
