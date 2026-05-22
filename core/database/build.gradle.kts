@@ -35,6 +35,9 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
 
+    // Serialization for Room Converters
+    implementation(libs.gson)
+
     // Project Dependencies
     implementation(project(":core:domain"))
 
