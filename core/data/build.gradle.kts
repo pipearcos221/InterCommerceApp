@@ -35,7 +35,13 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:database"))
 
+    // Explicit dependency for HttpException handling
+    implementation(libs.retrofit)
+
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
