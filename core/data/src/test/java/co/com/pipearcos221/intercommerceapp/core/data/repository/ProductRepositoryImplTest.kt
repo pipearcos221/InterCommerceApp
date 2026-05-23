@@ -1,5 +1,6 @@
 package co.com.pipearcos221.intercommerceapp.core.data.repository
 
+import android.util.Log
 import app.cash.turbine.test
 import co.com.pipearcos221.intercommerceapp.core.database.dao.ProductDao
 import co.com.pipearcos221.intercommerceapp.core.database.entity.ProductEntity
@@ -10,29 +11,38 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertNotNull
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
 
 class ProductRepositoryImplTest {
 
+    private val testDispatcher = StandardTestDispatcher()
     private val productDao: ProductDao = mockk()
     private val apiService: ProductApiService = mockk()
     private lateinit var repository: ProductRepositoryImpl
 
     @Before
     fun setUp() {
-        repository = ProductRepositoryImpl(productDao, apiService)
+        repository = ProductRepositoryImpl(productDao, apiService, testDispatcher)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
     }
 
     @Test
-    fun `when getProducts then return paging data flow`() = runTest {
+    fun `when getProducts then return paging data flow`() = runTest(testDispatcher) {
         // Given
-        every { productDao.getProducts() } returns mockk() // PagingSource
+        every { productDao.getProducts() } returns mockk()
 
         // When
         val result = repository.getProducts()
@@ -42,7 +52,7 @@ class ProductRepositoryImplTest {
     }
 
     @Test
-    fun `given an entity in database when getProductById then return domain product mapped correctly`() = runTest {
+    fun `given an entity in database when getProductById then return domain product mapped correctly`() = runTest(testDispatcher) {
         // Given
         val entity = createFakeEntity(id = 1, title = "Product 1")
         every { productDao.getProductById(1) } returns flowOf(entity)
@@ -56,7 +66,7 @@ class ProductRepositoryImplTest {
     }
 
     @Test
-    fun `given successful api response when syncProducts then call dao to insert products`() = runTest {
+    fun `given successful api response when syncProducts then call dao to insert products`() = runTest(testDispatcher) {
         // Given
         val dtos = listOf(createFakeDto(id = 1, title = "Product 1"))
         val response = ProductResponseDto(products = dtos)
@@ -73,15 +83,17 @@ class ProductRepositoryImplTest {
     }
 
     @Test
-    fun `given api failure when syncProducts then return failure result`() = runTest {
+    fun `given api failure when syncProducts then return failure result`() = runTest(testDispatcher) {
         // Given
-        coEvery { apiService.getProducts(any(), any()) } throws IOException("No network")
+        val exception = IOException("No network")
+        coEvery { apiService.getProducts(any(), any()) } throws exception
 
         // When
         val result = repository.syncProducts()
 
         // Then
         assert(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify(exactly = 1) { apiService.getProducts(any(), any()) }
         coVerify(exactly = 0) { productDao.insertProducts(any()) }
     }
