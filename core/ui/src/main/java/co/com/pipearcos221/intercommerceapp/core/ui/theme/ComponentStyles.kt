@@ -44,6 +44,7 @@ object InterCommerceStyles {
     // Shimmer Colors
     val shimmerBaseColor = Color(0xFFEBEBF4)
     val shimmerHighlightColor = Color(0xFFF4F4F4)
+    val productCardBackground = Color(0xFFF5F5F5)
     
     // Animation Labels
     const val SHIMMER_ANIM_LABEL = "shimmer_animation"

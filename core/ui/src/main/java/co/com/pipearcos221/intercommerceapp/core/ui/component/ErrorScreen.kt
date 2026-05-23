@@ -57,7 +57,11 @@ fun ErrorScreen(
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(modifier = Modifier.height(InterCommerceStyles.paddingLarge).padding(top = InterCommerceStyles.paddingMedium))
+        Spacer(
+            modifier = Modifier
+                .height(InterCommerceStyles.paddingLarge)
+                .padding(top = InterCommerceStyles.paddingMedium)
+        )
         Button(
             onClick = onAction,
             shape = InterCommerceStyles.buttonShape
