@@ -1,6 +1,5 @@
 package co.com.pipearcos221.intercommerceapp.core.data.repository
 
-import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -49,7 +48,6 @@ class ProductRepositoryImpl @Inject constructor(
             productDao.insertProducts(response.products.map { it.toEntity() })
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("ProductRepository", "Sync failed", e)
             if (e is CancellationException) throw e
             Result.failure(e)
         }
