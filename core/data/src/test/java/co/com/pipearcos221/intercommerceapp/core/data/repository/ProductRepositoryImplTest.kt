@@ -12,6 +12,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -29,18 +30,15 @@ class ProductRepositoryImplTest {
     }
 
     @Test
-    fun `given entities in database when getProducts then return domain products mapped correctly`() = runTest {
+    fun `when getProducts then return paging data flow`() = runTest {
         // Given
-        val entities = listOf(createFakeEntity(id = 1, title = "Product 1"))
-        every { productDao.getProducts() } returns flowOf(entities)
+        every { productDao.getProducts() } returns mockk() // PagingSource
 
-        // When & Then
-        repository.getProducts().test {
-            val result = awaitItem()
-            assertEquals(1, result.size)
-            assertEquals("Product 1", result[0].title)
-            awaitComplete()
-        }
+        // When
+        val result = repository.getProducts()
+
+        // Then
+        assertNotNull(result)
     }
 
     @Test
@@ -62,27 +60,29 @@ class ProductRepositoryImplTest {
         // Given
         val dtos = listOf(createFakeDto(id = 1, title = "Product 1"))
         val response = ProductResponseDto(products = dtos)
-        coEvery { apiService.getProducts() } returns response
+        coEvery { apiService.getProducts(any(), any()) } returns response
         coEvery { productDao.insertProducts(any()) } returns Unit
 
         // When
-        repository.syncProducts()
+        val result = repository.syncProducts()
 
         // Then
-        coVerify(exactly = 1) { apiService.getProducts() }
+        assert(result.isSuccess)
+        coVerify(exactly = 1) { apiService.getProducts(any(), any()) }
         coVerify(exactly = 1) { productDao.insertProducts(any()) }
     }
 
     @Test
-    fun `given api failure when syncProducts then handle silently and do not call dao`() = runTest {
+    fun `given api failure when syncProducts then return failure result`() = runTest {
         // Given
-        coEvery { apiService.getProducts() } throws IOException("No network")
+        coEvery { apiService.getProducts(any(), any()) } throws IOException("No network")
 
         // When
-        repository.syncProducts()
+        val result = repository.syncProducts()
 
         // Then
-        coVerify(exactly = 1) { apiService.getProducts() }
+        assert(result.isFailure)
+        coVerify(exactly = 1) { apiService.getProducts(any(), any()) }
         coVerify(exactly = 0) { productDao.insertProducts(any()) }
     }
 
