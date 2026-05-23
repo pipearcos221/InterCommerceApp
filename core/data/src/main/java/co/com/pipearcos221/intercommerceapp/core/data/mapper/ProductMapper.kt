@@ -20,6 +20,22 @@ fun ProductDto.toEntity(): ProductEntity {
     )
 }
 
+fun ProductDto.toDomain(): Product {
+    return Product(
+        id = id,
+        title = title,
+        description = description,
+        price = price,
+        discountPercentage = discountPercentage,
+        rating = rating,
+        stock = stock,
+        brand = brand ?: "",
+        category = category,
+        thumbnail = thumbnail,
+        images = images
+    )
+}
+
 fun ProductEntity.toDomain(): Product {
     return Product(
         id = id,

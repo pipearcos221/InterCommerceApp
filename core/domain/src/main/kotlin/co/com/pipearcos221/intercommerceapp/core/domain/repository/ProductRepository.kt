@@ -8,7 +8,7 @@ interface ProductRepository {
 
     fun getProducts(): Flow<PagingData<Product>>
 
-    fun getProductById(productId: Int): Flow<Product?>
+    suspend fun getProductById(id: Int): Result<Product>
 
     suspend fun syncProducts(): Result<Unit>
 }
