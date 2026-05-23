@@ -18,6 +18,7 @@ coroutines = "1.9.0"
 turbine = "1.2.0"
 detekt = "1.23.7"
 jacoco = "0.8.12"
+coil = "2.6.0"
 javaxInject = "1"
 mockk = "1.13.13"
 gson = "2.10.1"
@@ -39,6 +40,7 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 # Room
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
