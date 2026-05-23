@@ -17,6 +17,7 @@ okhttp = "4.12.0"
 coroutines = "1.9.0"
 turbine = "1.2.0"
 detekt = "1.23.7"
+paging = "3.3.4"
 jacoco = "0.8.12"
 coil = "2.6.0"
 javaxInject = "1"
@@ -62,6 +63,10 @@ javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "j
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

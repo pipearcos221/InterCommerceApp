@@ -19,6 +19,9 @@ dependencies {
 
     // Kotlin Coroutines para el manejo de Flows y procesos asíncronos en UseCases
     implementation(libs.kotlinx.coroutines.core)
+    
+    // Paging Common (Pure Kotlin)
+    implementation(libs.androidx.paging.common)
 
     // Unit Testing
     testImplementation(libs.junit)

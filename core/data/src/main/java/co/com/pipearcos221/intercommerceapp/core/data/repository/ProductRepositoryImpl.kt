@@ -1,5 +1,10 @@
 package co.com.pipearcos221.intercommerceapp.core.data.repository
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import co.com.pipearcos221.intercommerceapp.core.data.mapper.toDomain
 import co.com.pipearcos221.intercommerceapp.core.data.mapper.toEntity
 import co.com.pipearcos221.intercommerceapp.core.database.dao.ProductDao
@@ -11,18 +16,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-/**
- * Implementación del Repositorio de Productos.
- * Maneja el flujo de datos entre la API y la base de datos local.
- */
+@OptIn(ExperimentalPagingApi::class)
 class ProductRepositoryImpl @Inject constructor(
     private val productDao: ProductDao,
     private val apiService: ProductApiService,
 ) : ProductRepository {
 
-    override fun getProducts(): Flow<List<Product>> {
-        return productDao.getProducts().map { entities ->
-            entities.map { it.toDomain() }
+    override fun getProducts(): Flow<PagingData<Product>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                prefetchDistance = PREFETCH_DISTANCE,
+                enablePlaceholders = false
+            ),
+            remoteMediator = ProductRemoteMediator(productDao, apiService),
+            pagingSourceFactory = { productDao.getProducts() }
+        ).flow.map { pagingData ->
+            pagingData.map { it.toDomain() }
         }
     }
 
@@ -34,13 +44,18 @@ class ProductRepositoryImpl @Inject constructor(
 
     override suspend fun syncProducts(): Result<Unit> {
         return try {
-            val response = apiService.getProducts()
-            val entities = response.products.map { it.toEntity() }
-            productDao.insertProducts(entities)
+            val response = apiService.getProducts(limit = PAGE_SIZE, skip = INITIAL_SKIP_INDEX)
+            productDao.insertProducts(response.products.map { it.toEntity() })
             Result.success(Unit)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             Result.failure(e)
         }
+    }
+
+    companion object {
+        private const val PAGE_SIZE = 20
+        private const val PREFETCH_DISTANCE = 5
+        private const val INITIAL_SKIP_INDEX = 0
     }
 }
