@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
 import co.com.pipearcos221.intercommerceapp.core.ui.component.ErrorScreen
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
@@ -58,34 +60,30 @@ fun CatalogScreen(
         contentWindowInsets = WindowInsets.systemBars
     ) { innerPadding ->
         val refreshState = pagingItems.loadState.refresh
-        val isRefreshing = refreshState is LoadState.Loading && 
-                pagingItems.itemCount > InterCommerceStyles.EMPTY_COUNT
 
-        PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = { pagingItems.refresh() },
-            modifier = Modifier.fillMaxSize()
-        ) {
-            when (refreshState) {
-                is LoadState.Loading -> {
-                    if (pagingItems.itemCount == InterCommerceStyles.EMPTY_COUNT) {
-                        LoadingGrid(innerPadding)
-                    }
-                }
+        when {
+            refreshState is LoadState.Loading -> LoadingGrid(innerPadding)
 
-                is LoadState.Error -> {
-                    ErrorScreen(
-                        message = refreshState.error.localizedMessage ?: stringResource(Rcore.string.error_unknown),
-                        icon = Icons.Default.Warning,
-                        onAction = { pagingItems.retry() },
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            refreshState is LoadState.Error
+                    && pagingItems.itemCount == InterCommerceStyles.EMPTY_COUNT -> {
+                ErrorScreen(
+                    message = refreshState.error.localizedMessage
+                        ?: stringResource(Rcore.string.error_unknown),
+                    icon = Icons.Default.Warning,
+                    onAction = { pagingItems.retry() },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
 
-                else -> {
+            else -> {
+                PullToRefreshBox(
+                    isRefreshing = false,
+                    onRefresh = { pagingItems.refresh() },
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     ProductGrid(
                         pagingItems = pagingItems,
-                        innerPadding = innerPadding,
+                        contentPadding = innerPadding,
                         onProductClick = onProductClick,
                         onAddToCart = { _ ->
                             // TODO: Conectar con el ViewModel del Carrito en el siguiente Sprint
@@ -100,7 +98,7 @@ fun CatalogScreen(
 @Composable
 private fun ProductGrid(
     pagingItems: LazyPagingItems<Product>,
-    innerPadding: PaddingValues,
+    contentPadding: PaddingValues,
     onProductClick: (Int) -> Unit,
     onAddToCart: (Product) -> Unit,
 ) {
@@ -109,8 +107,8 @@ private fun ProductGrid(
         contentPadding = PaddingValues(
             start = InterCommerceStyles.paddingLarge,
             end = InterCommerceStyles.paddingLarge,
-            top = innerPadding.calculateTopPadding(),
-            bottom = innerPadding.calculateBottomPadding() + InterCommerceStyles.paddingLarge
+            top = contentPadding.calculateTopPadding(),
+            bottom = contentPadding.calculateBottomPadding() + InterCommerceStyles.paddingLarge
         ),
         modifier = Modifier.fillMaxSize()
     ) {
@@ -120,9 +118,11 @@ private fun ProductGrid(
 
         items(
             count = pagingItems.itemCount,
-            key = { index -> pagingItems[index]?.id ?: index }
+            key = pagingItems.itemKey { it.id },
+            contentType = pagingItems.itemContentType { "Product" }
         ) { index ->
-            pagingItems[index]?.let { product ->
+            val product = pagingItems[index]
+            if (product != null) {
                 ProductCard(
                     product = product,
                     onClick = { onProductClick(product.id) },
