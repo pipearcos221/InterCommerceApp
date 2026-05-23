@@ -1,6 +1,5 @@
 package co.com.pipearcos221.intercommerceapp.core.data.repository
 
-import android.util.Log
 import app.cash.turbine.test
 import co.com.pipearcos221.intercommerceapp.core.database.dao.ProductDao
 import co.com.pipearcos221.intercommerceapp.core.database.entity.ProductEntity
@@ -52,51 +51,54 @@ class ProductRepositoryImplTest {
     }
 
     @Test
-    fun `given an entity in database when getProductById then return domain product mapped correctly`() = runTest(testDispatcher) {
-        // Given
-        val entity = createFakeEntity(id = 1, title = "Product 1")
-        every { productDao.getProductById(1) } returns flowOf(entity)
+    fun `given an entity in database when getProductById then return domain product mapped `() =
+        runTest(testDispatcher) {
+            // Given
+            val entity = createFakeEntity(id = 1, title = "Product 1")
+            every { productDao.getProductById(1) } returns flowOf(entity)
 
-        // When & Then
-        repository.getProductById(1).test {
-            val result = awaitItem()
-            assertEquals("Product 1", result?.title)
-            awaitComplete()
+            // When & Then
+            repository.getProductById(1).test {
+                val result = awaitItem()
+                assertEquals("Product 1", result?.title)
+                awaitComplete()
+            }
         }
-    }
 
     @Test
-    fun `given successful api response when syncProducts then call dao to insert products`() = runTest(testDispatcher) {
-        // Given
-        val dtos = listOf(createFakeDto(id = 1, title = "Product 1"))
-        val response = ProductResponseDto(products = dtos)
-        coEvery { apiService.getProducts(any(), any()) } returns response
-        coEvery { productDao.insertProducts(any()) } returns Unit
+    fun `given successful api response when syncProducts then call dao to insert products`() =
+        runTest(testDispatcher) {
+            // Given
+            val dtos = listOf(createFakeDto(id = 1, title = "Product 1"))
+            val response = ProductResponseDto(products = dtos)
+            coEvery { apiService.getProducts(any(), any()) } returns response
+            coEvery { productDao.insertProducts(any()) } returns Unit
 
-        // When
-        val result = repository.syncProducts()
+            // When
+            val result = repository.syncProducts()
 
-        // Then
-        assert(result.isSuccess)
-        coVerify(exactly = 1) { apiService.getProducts(any(), any()) }
-        coVerify(exactly = 1) { productDao.insertProducts(any()) }
-    }
+            // Then
+            assert(result.isSuccess)
+            coVerify(exactly = 1) { apiService.getProducts(any(), any()) }
+            coVerify(exactly = 1) { productDao.insertProducts(any()) }
+        }
 
     @Test
-    fun `given api failure when syncProducts then return failure result`() = runTest(testDispatcher) {
-        // Given
-        val exception = IOException("No network")
-        coEvery { apiService.getProducts(any(), any()) } throws exception
+    fun `given api failure when syncProducts then return failure result`() =
+        runTest(testDispatcher) {
+            // Given
+            val exception = IOException("No network")
+            coEvery { apiService.getProducts(any(), any()) } throws exception
 
-        // When
-        val result = repository.syncProducts()
+            // When
+            val result = repository.syncProducts()
 
-        // Then
-        assert(result.isFailure)
-        assertEquals(exception, result.exceptionOrNull())
-        coVerify(exactly = 1) { apiService.getProducts(any(), any()) }
-        coVerify(exactly = 0) { productDao.insertProducts(any()) }
-    }
+            // Then
+            assert(result.isFailure)
+            assertEquals(exception, result.exceptionOrNull())
+            coVerify(exactly = 1) { apiService.getProducts(any(), any()) }
+            coVerify(exactly = 0) { productDao.insertProducts(any()) }
+        }
 
     private fun createFakeEntity(id: Int, title: String) = ProductEntity(
         id = id,
