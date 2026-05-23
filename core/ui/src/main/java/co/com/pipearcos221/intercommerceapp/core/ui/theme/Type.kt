@@ -1,4 +1,4 @@
-package co.com.pipearcos221.intercommerceapp.ui.theme
+package co.com.pipearcos221.intercommerceapp.core.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

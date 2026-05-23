@@ -1,4 +1,4 @@
-package co.com.pipearcos221.intercommerceapp.ui.theme
+package co.com.pipearcos221.intercommerceapp.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

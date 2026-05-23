@@ -1,47 +1,52 @@
 package co.com.pipearcos221.intercommerceapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import co.com.pipearcos221.intercommerceapp.ui.theme.InterCommerceAppTheme
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CatalogRoute
+import co.com.pipearcos221.intercommerceapp.core.ui.navigation.ProductDetailRoute
+import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceAppTheme
+import co.com.pipearcos221.intercommerceapp.feature.catalog.ui.CatalogScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             InterCommerceAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                InterCommerceApp()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun InterCommerceApp() {
+    val navController = rememberNavController()
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    InterCommerceAppTheme {
-        Greeting("Android")
+    NavHost(
+        navController = navController,
+        startDestination = CatalogRoute
+    ) {
+        composable<CatalogRoute> {
+            CatalogScreen(
+                viewModel = hiltViewModel(),
+                onProductClick = { productId ->
+                    Log.d("Navigation", "Navigating to Product: $productId")
+                    navController.navigate(ProductDetailRoute(productId = productId))
+                }
+            )
+        }
+        
+        // El destino ProductDetailRoute se implementará en el siguiente módulo
     }
 }
