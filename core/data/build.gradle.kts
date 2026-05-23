@@ -25,10 +25,22 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    
+    // Paging
+    implementation(libs.androidx.paging.runtime)
 
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+
+    // Room (Transitive for DatabaseModule)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+
+    // Network (Transitive for NetworkModule)
+    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
 
     // Project Dependencies
     implementation(project(":core:domain"))

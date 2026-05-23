@@ -34,6 +34,10 @@ dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
+    implementation(libs.room.paging)
+
+    // Paging (Required for PagingSource in DAO)
+    implementation(libs.androidx.paging.common)
 
     // Serialization for Room Converters
     implementation(libs.gson)
