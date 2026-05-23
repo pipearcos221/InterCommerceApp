@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,9 +33,6 @@ import co.com.pipearcos221.intercommerceapp.feature.catalog.ui.components.Produc
 import co.com.pipearcos221.intercommerceapp.feature.catalog.ui.components.ProductCardSkeleton
 import co.com.pipearcos221.intercommerceapp.core.ui.R as Rcore
 
-/**
- * Main Catalog Screen with Paging 3, Swipe-to-Refresh and Edge-to-Edge support.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogScreen(

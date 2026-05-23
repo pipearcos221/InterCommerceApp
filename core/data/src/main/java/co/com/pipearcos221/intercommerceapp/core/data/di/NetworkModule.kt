@@ -13,9 +13,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import javax.inject.Singleton
 
-/**
- * Módulo de Hilt para proveer dependencias de red.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
