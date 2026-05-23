@@ -25,6 +25,8 @@ object InterCommerceStyles {
     val adaptiveGridMinSize = 160.dp
     const val PRODUCT_CARD_ASPECT_RATIO = 0.9f
     val errorIconSize = 80.dp
+    val quickAddButtonSize = 32.dp
+    val quickAddIconSize = 18.dp
     
     // Skeleton Specific Dimensions
     val skeletonTitleHeight = 16.dp
@@ -49,4 +51,8 @@ object InterCommerceStyles {
     // Animation Labels
     const val SHIMMER_ANIM_LABEL = "shimmer_animation"
     const val SHIMMER_TRANS_LABEL = "shimmer_transition"
+
+    // Logic Constants
+    const val EMPTY_COUNT = 0
+    const val SINGLE_LINE = 1
 }
