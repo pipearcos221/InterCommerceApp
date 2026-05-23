@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="catalog_app_bar_title">InterCommerce</string>
+    <string name="catalog_greeting_user">Good Morning, User</string>
+    <string name="catalog_section_title">Top Picks for You</string>
+    <string name="catalog_section_subtitle">Recommended products</string>
+    <string name="catalog_price_format">USD %s</string>
+</resources>
