@@ -37,6 +37,10 @@ class CatalogViewModel @Inject constructor(
         syncCatalog()
     }
 
+    fun onRetry() {
+        syncCatalog()
+    }
+
     private fun syncCatalog() {
         viewModelScope.launch {
             _isLoading.value = true
