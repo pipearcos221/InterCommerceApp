@@ -14,7 +14,7 @@ import co.com.pipearcos221.intercommerceapp.core.database.entity.ProductEntity
         ProductEntity::class,
         CartEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

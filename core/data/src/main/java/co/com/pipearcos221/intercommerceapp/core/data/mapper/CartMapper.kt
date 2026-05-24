@@ -3,7 +3,6 @@ package co.com.pipearcos221.intercommerceapp.core.data.mapper
 import co.com.pipearcos221.intercommerceapp.core.database.entity.CartEntity
 import co.com.pipearcos221.intercommerceapp.core.domain.model.CartItem
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
-import co.com.pipearcos221.intercommerceapp.core.data.util.DataConstants
 
 fun CartEntity.toDomain(): CartItem {
     return CartItem(
@@ -15,10 +14,10 @@ fun CartEntity.toDomain(): CartItem {
             price = originalPrice,
             discountPercentage = discountPercentage,
             priceWithDiscount = priceWithDiscount,
-            description = DataConstants.DEFAULT_STRING,
-            rating = DataConstants.DEFAULT_RATING,
-            stock = DataConstants.DEFAULT_STOCK,
-            brand = DataConstants.DEFAULT_STRING,
+            description = "",
+            rating = 0.0,
+            stock = 0,
+            brand = "",
             images = emptyList()
         ),
         quantity = quantity

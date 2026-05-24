@@ -8,85 +8,81 @@ import org.junit.Test
 
 class CalculateCartTotalsUseCaseTest {
 
-    private lateinit var calculateCartTotalsUseCase: CalculateCartTotalsUseCase
+    private lateinit var useCase: CalculateCartTotalsUseCase
 
     @Before
     fun setUp() {
-        calculateCartTotalsUseCase = CalculateCartTotalsUseCase()
+        useCase = CalculateCartTotalsUseCase()
     }
 
     @Test
-    fun `given an empty cart when calculate total then return zero`() {
+    fun `given an empty cart when calculate total then return zero totals`() {
         // Given
         val items = emptyList<CartItem>()
 
         // When
-        val result = calculateCartTotalsUseCase(items)
+        val result = useCase(items)
 
         // Then
-        val expected = 0.0
-        assertEquals(expected, result, 0.001)
+        assertEquals(0.0, result.originalSubtotal, 0.001)
+        assertEquals(0.0, result.totalDiscount, 0.001)
+        assertEquals(0.0, result.total, 0.001)
     }
 
     @Test
-    fun `given one product without discount when calculate total then return base price`() {
+    fun `given product with discount when calculate total then return correct breakdown`() {
         // Given
-        val product = createFakeProduct(price = 100.0, discount = 0.0)
-        val items = listOf(CartItem(product, quantity = 1))
+        // Price: 100.0, Discount: 10%, priceWithDiscount: 90.0
+        val product = createFakeProduct(price = 100.0, discount = 10.0, priceWithDiscount = 90.0)
+        val items = listOf(CartItem(product, quantity = 2)) // 200.0 total original, 180.0 total with discount
 
         // When
-        val result = calculateCartTotalsUseCase(items)
+        val result = useCase(items)
 
         // Then
-        val expected = 100.0
-        assertEquals(expected, result, 0.001)
+        assertEquals(200.0, result.originalSubtotal, 0.001)
+        assertEquals(20.0, result.totalDiscount, 0.001)
+        assertEquals(180.0, result.total, 0.001)
     }
 
     @Test
-    fun `given one product with discount when calculate total then return discounted price`() {
+    fun `given multiple products when calculate total then return summed breakdown`() {
         // Given
-        val product = createFakeProduct(price = 100.0, discount = 10.0) // 10% de 100 = 10
-        val items = listOf(CartItem(product, quantity = 2)) // (100 - 10) * 2 = 180
-
-        // When
-        val result = calculateCartTotalsUseCase(items)
-
-        // Then
-        val expected = 180.0
-        assertEquals(expected, result, 0.001)
-    }
-
-    @Test
-    fun `given multiple products with different quantities when calculate total then return sum of all`() {
-        // Given
-        val product1 = createFakeProduct(price = 50.0, discount = 0.0) // 50 * 2 = 100
-        val product2 = createFakeProduct(price = 100.0, discount = 20.0) // 80 * 1 = 80
+        val product1 = createFakeProduct(id = 1, price = 50.0, discount = 0.0, priceWithDiscount = 50.0)
+        val product2 = createFakeProduct(id = 2, price = 100.0, discount = 20.0, priceWithDiscount = 80.0)
         val items = listOf(
-            CartItem(product1, quantity = 2),
-            CartItem(product2, quantity = 1)
+            CartItem(product1, quantity = 2), // 100.0 original, 0 discount
+            CartItem(product2, quantity = 1)  // 100.0 original, 20 discount
         )
 
         // When
-        val result = calculateCartTotalsUseCase(items)
+        val result = useCase(items)
 
         // Then
-        val expected = 180.0
-        assertEquals(expected, result, 0.001)
+        assertEquals(200.0, result.originalSubtotal, 0.001)
+        assertEquals(20.0, result.totalDiscount, 0.001)
+        assertEquals(180.0, result.total, 0.001)
     }
 
-    private fun createFakeProduct(price: Double, discount: Double): Product {
+    private fun createFakeProduct(
+        id: Int = 1,
+        price: Double,
+        discount: Double,
+        priceWithDiscount: Double
+    ): Product {
         return Product(
-            id = 1,
+            id = id,
             title = "Test Product",
-            description = "Description",
+            description = "",
             price = price,
             discountPercentage = discount,
-            rating = 4.5,
-            stock = 10,
-            brand = "Brand",
-            category = "Category",
-            thumbnail = "url",
-            images = emptyList()
+            rating = 0.0,
+            stock = 0,
+            brand = "",
+            category = "",
+            thumbnail = "",
+            images = emptyList(),
+            priceWithDiscount = priceWithDiscount
         )
     }
 }
