@@ -49,6 +49,31 @@ object InterCommerceStyles {
     const val DETAIL_TITLE_WIDTH_RATIO = 0.7f
     const val DETAIL_DESCRIPTION_LINES = 5
     
+    // Carousel Indicators
+    val carouselIndicatorRowHeight = 50.dp
+    val carouselIndicatorSize = 8.dp
+    val carouselIndicatorPadding = 2.dp
+    const val MIN_IMAGES_FOR_INDICATOR = 1
+    
+    // Animation & State Constants
+    const val CART_ANIMATION_DELAY = 1500L
+    const val BUTTON_LOADING_ALPHA = 0.7f
+    val loaderSize = 24.dp
+    val loaderStrokeWidth = 2.dp
+    val successIconSize = 18.dp
+    
+    // Colors (Design Tokens)
+    val successColor = Color(0xFF2E7D32)
+    val discountBackgroundColor = Color(0xFFE8F5E9)
+    val discountTextColor = Color(0xFF2E7D32)
+    val overlayAlpha = 0.5f
+    val shadowElevation = 8.dp
+    
+    // Animation Ratios & Thresholds
+    const val PARALLAX_FACTOR = 0.5f
+    const val PARALLAX_FADE_THRESHOLD = 1000f
+    const val DESCRIPTION_LINE_HEIGHT_FACTOR = 1.2f
+    
     // Shimmer Animation Constants
     const val SHIMMER_DURATION_MS = 1200
     const val SHIMMER_START_OFFSET_FACTOR = -2f

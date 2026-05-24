@@ -12,7 +12,10 @@ sealed interface UiText {
     fun asString(): String {
         return when (this) {
             is DynamicString -> value
-            is ResourceString -> stringResource(resId, *args)
+            is ResourceString -> {
+                @Suppress("SpreadOperator")
+                stringResource(resId, *args)
+            }
         }
     }
 }
