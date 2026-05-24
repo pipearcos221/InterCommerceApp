@@ -67,12 +67,16 @@ object InterCommerceStyles {
     val discountBackgroundColor = Color(0xFFE8F5E9)
     val discountTextColor = Color(0xFF2E7D32)
     val overlayAlpha = 0.5f
+    val overlayLightAlpha = 0.2f
     val shadowElevation = 8.dp
     
     // Animation Ratios & Thresholds
     const val PARALLAX_FACTOR = 0.5f
     const val PARALLAX_FADE_THRESHOLD = 1000f
     const val DESCRIPTION_LINE_HEIGHT_FACTOR = 1.2f
+    const val INDEX_DISPLAY_OFFSET = 1
+    const val ALPHA_FULL = 1f
+    const val ALPHA_TRANSPARENT = 0f
     
     // Shimmer Animation Constants
     const val SHIMMER_DURATION_MS = 1200
