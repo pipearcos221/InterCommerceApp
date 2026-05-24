@@ -59,6 +59,7 @@ object InterCommerceStyles {
     const val CART_ANIMATION_DELAY = 500L
     const val BUTTON_RESET_DELAY = 1500L
     const val BUTTON_LOADING_ALPHA = 0.7f
+    const val NAVIGATION_TRANSITION_DURATION = 400
     val loaderSize = 24.dp
     val loaderStrokeWidth = 2.dp
     val successIconSize = 18.dp
