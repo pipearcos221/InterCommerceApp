@@ -1,5 +1,6 @@
 package co.com.pipearcos221.intercommerceapp.navigation
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -8,6 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CartRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CatalogRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.ProductDetailRoute
 import co.com.pipearcos221.intercommerceapp.feature.catalog.ui.CatalogScreen
@@ -29,6 +31,9 @@ fun InterCommerceNavHost(
                 viewModel = hiltViewModel(),
                 onProductClick = { productId ->
                     navController.navigate(ProductDetailRoute(productId = productId))
+                },
+                onCartClick = {
+                    navController.navigate(CartRoute)
                 }
             )
         }
@@ -37,13 +42,20 @@ fun InterCommerceNavHost(
             val viewModel: ProductDetailViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
             val cartButtonState by viewModel.cartButtonState.collectAsState()
+            val cartCount by viewModel.cartItemsCount.collectAsState()
             
             ProductDetailScreen(
                 uiState = uiState,
                 cartButtonState = cartButtonState,
+                cartCount = cartCount,
                 onBackClick = { navController.popBackStack() },
+                onCartClick = { navController.navigate(CartRoute) },
                 onAddToCart = { product -> viewModel.addProductToCart(product) }
             )
+        }
+
+        composable<CartRoute> {
+            Text(text = "Pantalla del Carrito en construcción")
         }
     }
 }

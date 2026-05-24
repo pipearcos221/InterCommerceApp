@@ -18,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +29,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
+import co.com.pipearcos221.intercommerceapp.core.ui.component.CartBadge
 import co.com.pipearcos221.intercommerceapp.core.ui.component.ErrorScreen
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import co.com.pipearcos221.intercommerceapp.feature.catalog.R
@@ -40,9 +43,11 @@ import co.com.pipearcos221.intercommerceapp.core.ui.R as Rcore
 fun CatalogScreen(
     viewModel: CatalogViewModel,
     onProductClick: (Int) -> Unit,
+    onCartClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagingItems = viewModel.productsFlow.collectAsLazyPagingItems()
+    val cartCount by viewModel.cartItemsCount.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -53,6 +58,12 @@ fun CatalogScreen(
                         text = stringResource(R.string.catalog_app_bar_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
+                    )
+                },
+                actions = {
+                    CartBadge(
+                        count = cartCount,
+                        onCartClick = onCartClick
                     )
                 }
             )
@@ -85,9 +96,7 @@ fun CatalogScreen(
                         pagingItems = pagingItems,
                         contentPadding = innerPadding,
                         onProductClick = onProductClick,
-                        onAddToCart = { _ ->
-                            // TODO: Conectar con el ViewModel del Carrito en el siguiente Sprint
-                        }
+                        onAddToCart = { /* TODO: Quick Add */ }
                     )
                 }
             }

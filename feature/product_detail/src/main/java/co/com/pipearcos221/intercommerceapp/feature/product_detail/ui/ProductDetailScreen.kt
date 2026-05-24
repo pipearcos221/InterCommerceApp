@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -51,6 +50,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
+import co.com.pipearcos221.intercommerceapp.core.ui.component.CartBadge
 import co.com.pipearcos221.intercommerceapp.core.ui.component.ErrorScreen
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.R
@@ -61,14 +61,13 @@ import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImagePreviewDialog
 import co.com.pipearcos221.intercommerceapp.core.ui.R as Rcore
 
-/**
- * Main Product Detail Screen with immersive design and premium animations.
- */
 @Composable
 fun ProductDetailScreen(
     uiState: ProductDetailUiState,
     cartButtonState: CartButtonState,
+    cartCount: Int,
     onBackClick: () -> Unit,
+    onCartClick: () -> Unit,
     onAddToCart: (Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -81,7 +80,9 @@ fun ProductDetailScreen(
                 ProductDetailContent(
                     product = uiState.product,
                     cartButtonState = cartButtonState,
+                    cartCount = cartCount,
                     onBackClick = onBackClick,
+                    onCartClick = onCartClick,
                     onAddToCart = onAddToCart
                 )
             }
@@ -101,7 +102,9 @@ fun ProductDetailScreen(
 private fun ProductDetailContent(
     product: Product,
     cartButtonState: CartButtonState,
+    cartCount: Int,
     onBackClick: () -> Unit,
+    onCartClick: () -> Unit,
     onAddToCart: (Product) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -234,6 +237,13 @@ private fun ProductDetailContent(
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
+                },
+                actions = {
+                    CartBadge(
+                        count = cartCount,
+                        onCartClick = onCartClick,
+                        modifier = Modifier.statusBarsPadding()
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
