@@ -6,7 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
 import co.com.pipearcos221.intercommerceapp.core.domain.repository.CartRepository
-import co.com.pipearcos221.intercommerceapp.core.domain.repository.ProductRepository
+import co.com.pipearcos221.intercommerceapp.core.domain.usecase.GetProductsUseCase
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -18,12 +18,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CatalogViewModel @Inject constructor(
-    productRepository: ProductRepository,
+    getProductsUseCase: GetProductsUseCase,
     cartRepository: CartRepository
 ) : ViewModel() {
 
-    val productsFlow: Flow<PagingData<Product>> = productRepository
-        .getProducts()
+    val productsFlow: Flow<PagingData<Product>> = getProductsUseCase()
         .cachedIn(viewModelScope)
     
     val cartItemsCount: StateFlow<Int> = cartRepository.getCartItems()

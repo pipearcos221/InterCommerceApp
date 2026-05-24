@@ -22,10 +22,10 @@ class GetProductDetailUseCaseTest {
     }
 
     @Test
-    fun `given a valid productId, when use case is invoked, then return successful product result`() = runTest {
+    fun `given a valid productId, when use case is invoked, then return successful product with calculated price`() = runTest {
         // Given
         val productId = 1
-        val mockProduct = createMockProduct(id = productId)
+        val mockProduct = createMockProduct(id = productId, price = 10.0, discount = 0.0)
         coEvery { repository.getProductById(productId) } returns Result.success(mockProduct)
 
         // When
@@ -33,7 +33,8 @@ class GetProductDetailUseCaseTest {
 
         // Then
         assertTrue(result.isSuccess)
-        assertEquals(mockProduct, result.getOrNull())
+        val product = result.getOrNull()
+        assertEquals(10.0, product?.priceWithDiscount ?: 0.0, 0.001)
         coVerify(exactly = 1) { repository.getProductById(productId) }
     }
 
@@ -53,19 +54,20 @@ class GetProductDetailUseCaseTest {
         coVerify(exactly = 1) { repository.getProductById(productId) }
     }
 
-    private fun createMockProduct(id: Int): Product {
+    private fun createMockProduct(id: Int, price: Double, discount: Double): Product {
         return Product(
             id = id,
             title = "Test Product",
             description = "Desc",
-            price = 10.0,
-            discountPercentage = 0.0,
+            price = price,
+            discountPercentage = discount,
             rating = 4.5,
             stock = 10,
             brand = "Brand",
             category = "Cat",
             thumbnail = "thumb",
-            images = emptyList()
+            images = emptyList(),
+            priceWithDiscount = 0.0
         )
     }
 }
