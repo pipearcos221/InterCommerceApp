@@ -36,10 +36,13 @@ fun InterCommerceNavHost(
         composable<ProductDetailRoute> {
             val viewModel: ProductDetailViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
+            val cartButtonState by viewModel.cartButtonState.collectAsState()
             
             ProductDetailScreen(
                 uiState = uiState,
-                onBackClick = { navController.popBackStack() }
+                cartButtonState = cartButtonState,
+                onBackClick = { navController.popBackStack() },
+                onAddToCart = { product -> viewModel.addProductToCart(product) }
             )
         }
     }

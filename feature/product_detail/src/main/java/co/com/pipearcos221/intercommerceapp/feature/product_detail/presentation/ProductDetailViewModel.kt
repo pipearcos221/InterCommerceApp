@@ -4,20 +4,29 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
+import co.com.pipearcos221.intercommerceapp.core.domain.usecase.AddToCartUseCase
 import co.com.pipearcos221.intercommerceapp.core.domain.usecase.GetProductDetailUseCase
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.ProductDetailRoute
+import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import co.com.pipearcos221.intercommerceapp.core.ui.util.UiText
 import co.com.pipearcos221.intercommerceapp.core.ui.R as Rcore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class CartButtonState {
+    Idle, Loading, Success
+}
+
 @HiltViewModel
 class ProductDetailViewModel @Inject constructor(
     private val getProductDetailUseCase: GetProductDetailUseCase,
+    private val addToCartUseCase: AddToCartUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -25,6 +34,9 @@ class ProductDetailViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
+
+    private val _cartButtonState = MutableStateFlow(CartButtonState.Idle)
+    val cartButtonState: StateFlow<CartButtonState> = _cartButtonState.asStateFlow()
 
     init {
         loadProduct(route.productId)
@@ -45,6 +57,21 @@ class ProductDetailViewModel @Inject constructor(
                     
                     _uiState.value = ProductDetailUiState.Error(message)
                 }
+        }
+    }
+
+    fun addProductToCart(product: Product) {
+        if (_cartButtonState.value != CartButtonState.Idle) return
+
+        viewModelScope.launch {
+            _cartButtonState.value = CartButtonState.Loading
+
+            addToCartUseCase(product)
+            delay(InterCommerceStyles.CART_ANIMATION_DELAY)
+            
+            _cartButtonState.value = CartButtonState.Success
+            delay(InterCommerceStyles.BUTTON_RESET_DELAY)
+            _cartButtonState.value = CartButtonState.Idle
         }
     }
 }

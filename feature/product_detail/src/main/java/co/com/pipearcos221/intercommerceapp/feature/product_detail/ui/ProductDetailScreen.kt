@@ -1,5 +1,10 @@
 package co.com.pipearcos221.intercommerceapp.feature.product_detail.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,14 +17,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,14 +47,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
 import co.com.pipearcos221.intercommerceapp.core.ui.component.ErrorScreen
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.R
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.CartButtonState
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.ProductDetailUiState
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductDetailSkeleton
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImageCarousel
@@ -54,7 +65,9 @@ import co.com.pipearcos221.intercommerceapp.core.ui.R as Rcore
 @Composable
 fun ProductDetailScreen(
     uiState: ProductDetailUiState,
+    cartButtonState: CartButtonState,
     onBackClick: () -> Unit,
+    onAddToCart: (Product) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -65,7 +78,9 @@ fun ProductDetailScreen(
             is ProductDetailUiState.Success -> {
                 ProductDetailContent(
                     product = uiState.product,
-                    onBackClick = onBackClick
+                    cartButtonState = cartButtonState,
+                    onBackClick = onBackClick,
+                    onAddToCart = onAddToCart
                 )
             }
             is ProductDetailUiState.Error -> {
@@ -83,7 +98,9 @@ fun ProductDetailScreen(
 @Composable
 private fun ProductDetailContent(
     product: Product,
-    onBackClick: () -> Unit
+    cartButtonState: CartButtonState,
+    onBackClick: () -> Unit,
+    onAddToCart: (Product) -> Unit
 ) {
     val scrollState = rememberScrollState()
     var selectedImageIndex by remember { mutableStateOf<Int?>(null) }
@@ -92,7 +109,8 @@ private fun ProductDetailContent(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             AddToBagButton(
-                onClick = { /* Comportamiento futuro */ }
+                state = cartButtonState,
+                onClick = { onAddToCart(product) }
             )
         }
     ) { innerPadding ->
@@ -216,8 +234,8 @@ private fun ProductDetailContent(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = Color.Transparent
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    scrolledContainerColor = androidx.compose.ui.graphics.Color.Transparent
                 )
             )
         }
@@ -235,8 +253,19 @@ private fun ProductDetailContent(
 
 @Composable
 private fun AddToBagButton(
+    state: CartButtonState,
     onClick: () -> Unit
 ) {
+    val loadingAlpha = InterCommerceStyles.BUTTON_LOADING_ALPHA
+    val backgroundColor by animateColorAsState(
+        targetValue = when (state) {
+            CartButtonState.Idle -> MaterialTheme.colorScheme.primary
+            CartButtonState.Loading -> MaterialTheme.colorScheme.primary.copy(alpha = loadingAlpha)
+            CartButtonState.Success -> InterCommerceStyles.successColor
+        },
+        label = "button_color"
+    )
+
     Surface(
         tonalElevation = InterCommerceStyles.shadowElevation,
         shadowElevation = InterCommerceStyles.shadowElevation,
@@ -251,13 +280,48 @@ private fun AddToBagButton(
             Button(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),
-                shape = InterCommerceStyles.buttonShape
+                shape = InterCommerceStyles.buttonShape,
+                colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+                enabled = state == CartButtonState.Idle
             ) {
-                Text(
-                    text = stringResource(R.string.product_detail_add_to_cart),
-                    modifier = Modifier.padding(vertical = InterCommerceStyles.paddingSmall),
-                    fontWeight = FontWeight.Bold
-                )
+                AnimatedContent(
+                    targetState = state,
+                    transitionSpec = {
+                        fadeIn() togetherWith fadeOut()
+                    },
+                    label = "button_content"
+                ) { targetState ->
+                    when (targetState) {
+                        CartButtonState.Idle -> {
+                            Text(
+                                text = stringResource(R.string.product_detail_add_to_cart),
+                                modifier = Modifier.padding(vertical = InterCommerceStyles.paddingSmall),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        CartButtonState.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(InterCommerceStyles.loaderSize),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = InterCommerceStyles.loaderStrokeWidth
+                            )
+                        }
+                        CartButtonState.Success -> {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(InterCommerceStyles.successIconSize)
+                                )
+                                Spacer(modifier = Modifier.width(InterCommerceStyles.paddingMedium))
+                                Text(
+                                    text = stringResource(R.string.product_detail_added_to_cart),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

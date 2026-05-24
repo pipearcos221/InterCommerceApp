@@ -57,6 +57,7 @@ object InterCommerceStyles {
     
     // Animation & State Constants
     const val CART_ANIMATION_DELAY = 1500L
+    const val BUTTON_RESET_DELAY = 3000L
     const val BUTTON_LOADING_ALPHA = 0.7f
     val loaderSize = 24.dp
     val loaderStrokeWidth = 2.dp
