@@ -27,7 +27,9 @@ object DatabaseModule {
             context,
             InterCommerceDatabase::class.java,
             DATABASE_NAME
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
