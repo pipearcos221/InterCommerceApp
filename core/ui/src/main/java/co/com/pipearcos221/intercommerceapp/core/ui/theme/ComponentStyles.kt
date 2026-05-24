@@ -99,6 +99,13 @@ object InterCommerceStyles {
 
     // Logic Constants
     const val EMPTY_COUNT = 0
+    const val MIN_QUANTITY_THRESHOLD = 0
     const val SINGLE_LINE = 1
     const val FLOW_SUBSCRIPTION_TIMEOUT_MS = 5000L
+    const val SHIPPING_COST_FREE = 0.0
+    
+    // Cart Specific
+    val cartImageSize = 100.dp
+    val checkoutButtonHeight = 60.dp
+    val emptyCartIconSize = 100.dp
 }
