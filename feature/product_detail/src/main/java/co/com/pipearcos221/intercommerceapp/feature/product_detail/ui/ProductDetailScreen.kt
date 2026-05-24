@@ -62,14 +62,18 @@ import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImagePreviewDialog
 import java.util.Locale
 
+data class ProductDetailActions(
+    val onBackClick: () -> Unit,
+    val onCartClick: () -> Unit,
+    val onAddToCart: (Product) -> Unit
+)
+
 @Composable
 fun ProductDetailScreen(
     uiState: ProductDetailUiState,
     cartButtonState: CartButtonState,
     cartCount: Int,
-    onBackClick: () -> Unit,
-    onCartClick: () -> Unit,
-    onAddToCart: (Product) -> Unit,
+    actions: ProductDetailActions,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -82,16 +86,14 @@ fun ProductDetailScreen(
                     product = uiState.product,
                     cartButtonState = cartButtonState,
                     cartCount = cartCount,
-                    onBackClick = onBackClick,
-                    onCartClick = onCartClick,
-                    onAddToCart = onAddToCart
+                    actions = actions
                 )
             }
             is ProductDetailUiState.Error -> {
                 ErrorScreen(
                     message = uiState.message.asString(),
                     icon = Icons.Default.Warning,
-                    onAction = onBackClick
+                    onAction = actions.onBackClick
                 )
             }
         }
@@ -104,9 +106,7 @@ private fun ProductDetailContent(
     product: Product,
     cartButtonState: CartButtonState,
     cartCount: Int,
-    onBackClick: () -> Unit,
-    onCartClick: () -> Unit,
-    onAddToCart: (Product) -> Unit
+    actions: ProductDetailActions
 ) {
     val scrollState = rememberScrollState()
     var selectedImageIndex by remember { mutableStateOf<Int?>(null) }
@@ -116,7 +116,7 @@ private fun ProductDetailContent(
         bottomBar = {
             AddToBagButton(
                 state = cartButtonState,
-                onClick = { onAddToCart(product) }
+                onClick = { actions.onAddToCart(product) }
             )
         }
     ) { innerPadding ->
@@ -235,7 +235,7 @@ private fun ProductDetailContent(
                 title = { },
                 navigationIcon = {
                     IconButton(
-                        onClick = onBackClick,
+                        onClick = actions.onBackClick,
                         modifier = Modifier
                             .statusBarsPadding()
                             .padding(start = InterCommerceStyles.paddingMedium)
@@ -250,7 +250,7 @@ private fun ProductDetailContent(
                 actions = {
                     CartBadge(
                         count = cartCount,
-                        onCartClick = onCartClick,
+                        onCartClick = actions.onCartClick,
                         modifier = Modifier.statusBarsPadding()
                     )
                 },

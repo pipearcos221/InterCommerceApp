@@ -22,7 +22,7 @@ class GetProductDetailUseCaseTest {
     }
 
     @Test
-    fun `given a valid productId, when use case is invoked, then return successful product with calculated price`() = runTest {
+    fun `given a valid productId, when invoke detail, then return product with calculated price`() = runTest {
         // Given
         val productId = 1
         val mockProduct = createMockProduct(id = productId, price = 10.0, discount = 0.0)

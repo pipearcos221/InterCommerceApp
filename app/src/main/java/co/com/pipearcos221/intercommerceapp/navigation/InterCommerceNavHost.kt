@@ -27,6 +27,7 @@ import co.com.pipearcos221.intercommerceapp.feature.cart.presentation.CartViewMo
 import co.com.pipearcos221.intercommerceapp.feature.cart.ui.CartScreen
 import co.com.pipearcos221.intercommerceapp.feature.catalog.ui.CatalogScreen
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.ProductDetailViewModel
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.ProductDetailActions
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.ProductDetailScreen
 
 @Composable
@@ -61,9 +62,11 @@ fun InterCommerceNavHost(
                 uiState = uiState,
                 cartButtonState = cartButtonState,
                 cartCount = cartCount,
-                onBackClick = { navController.popBackStack() },
-                onCartClick = { navController.navigate(CartRoute) },
-                onAddToCart = { product -> viewModel.addProductToCart(product) }
+                actions = ProductDetailActions(
+                    onBackClick = { navController.popBackStack() },
+                    onCartClick = { navController.navigate(CartRoute) },
+                    onAddToCart = { product -> viewModel.addProductToCart(product) }
+                )
             )
         }
 
