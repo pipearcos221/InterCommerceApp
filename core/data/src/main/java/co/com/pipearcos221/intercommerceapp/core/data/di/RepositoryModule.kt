@@ -1,6 +1,8 @@
 package co.com.pipearcos221.intercommerceapp.core.data.di
 
+import co.com.pipearcos221.intercommerceapp.core.data.repository.CartRepositoryImpl
 import co.com.pipearcos221.intercommerceapp.core.data.repository.ProductRepositoryImpl
+import co.com.pipearcos221.intercommerceapp.core.domain.repository.CartRepository
 import co.com.pipearcos221.intercommerceapp.core.domain.repository.ProductRepository
 import dagger.Binds
 import dagger.Module
@@ -17,4 +19,10 @@ abstract class RepositoryModule {
     abstract fun bindProductRepository(
         productRepositoryImpl: ProductRepositoryImpl
     ): ProductRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCartRepository(
+        cartRepositoryImpl: CartRepositoryImpl
+    ): CartRepository
 }

@@ -1,5 +1,10 @@
 package co.com.pipearcos221.intercommerceapp.feature.product_detail.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -20,6 +26,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,24 +47,46 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
+import co.com.pipearcos221.intercommerceapp.core.ui.component.CartBadge
 import co.com.pipearcos221.intercommerceapp.core.ui.component.ErrorScreen
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.R
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.CartButtonState
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.ProductDetailUiState
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductDetailSkeleton
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImageCarousel
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImagePreviewDialog
-import co.com.pipearcos221.intercommerceapp.core.ui.R as Rcore
+import androidx.compose.runtime.LaunchedEffect
+import java.util.Locale
+
+data class ProductDetailActions(
+    val onBackClick: () -> Unit,
+    val onCartClick: () -> Unit,
+    val onAddToCart: (Product) -> Unit
+)
 
 @Composable
 fun ProductDetailScreen(
     uiState: ProductDetailUiState,
-    onBackClick: () -> Unit,
+    cartButtonState: CartButtonState,
+    cartCount: Int,
+    actions: ProductDetailActions,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
+
+    LaunchedEffect(cartButtonState) {
+        if (cartButtonState == CartButtonState.Success) {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         when (uiState) {
             is ProductDetailUiState.Loading -> {
@@ -65,14 +95,16 @@ fun ProductDetailScreen(
             is ProductDetailUiState.Success -> {
                 ProductDetailContent(
                     product = uiState.product,
-                    onBackClick = onBackClick
+                    cartButtonState = cartButtonState,
+                    cartCount = cartCount,
+                    actions = actions
                 )
             }
             is ProductDetailUiState.Error -> {
                 ErrorScreen(
                     message = uiState.message.asString(),
                     icon = Icons.Default.Warning,
-                    onAction = onBackClick
+                    onAction = actions.onBackClick
                 )
             }
         }
@@ -83,7 +115,9 @@ fun ProductDetailScreen(
 @Composable
 private fun ProductDetailContent(
     product: Product,
-    onBackClick: () -> Unit
+    cartButtonState: CartButtonState,
+    cartCount: Int,
+    actions: ProductDetailActions
 ) {
     val scrollState = rememberScrollState()
     var selectedImageIndex by remember { mutableStateOf<Int?>(null) }
@@ -92,7 +126,8 @@ private fun ProductDetailContent(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             AddToBagButton(
-                onClick = { /* Comportamiento futuro */ }
+                state = cartButtonState,
+                onClick = { actions.onAddToCart(product) }
             )
         }
     ) { innerPadding ->
@@ -151,11 +186,19 @@ private fun ProductDetailContent(
                         horizontalArrangement = Arrangement.spacedBy(InterCommerceStyles.paddingMedium)
                     ) {
                         Text(
-                            text = stringResource(Rcore.string.price_format, product.price.toString()),
+                            text = "$" + String.format(Locale.US, "%.2f", product.priceWithDiscount),
                             style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.ExtraBold
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (product.discountPercentage > InterCommerceStyles.ZERO_PERCENTAGE) 
+                                InterCommerceStyles.successColor else MaterialTheme.colorScheme.onSurface
                         )
                         if (product.discountPercentage > InterCommerceStyles.ZERO_PERCENTAGE) {
+                            Text(
+                                text = "$" + String.format(Locale.US, "%.2f", product.price),
+                                style = MaterialTheme.typography.titleMedium,
+                                textDecoration = TextDecoration.LineThrough,
+                                color = Color.Gray
+                            )
                             Surface(
                                 color = InterCommerceStyles.discountBackgroundColor,
                                 shape = CircleShape
@@ -163,7 +206,7 @@ private fun ProductDetailContent(
                                 Text(
                                     text = stringResource(
                                         R.string.product_detail_discount_format,
-                                        "${product.discountPercentage}%"
+                                        "${product.discountPercentage.toInt()}%"
                                     ),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = InterCommerceStyles.discountTextColor,
@@ -203,7 +246,7 @@ private fun ProductDetailContent(
                 title = { },
                 navigationIcon = {
                     IconButton(
-                        onClick = onBackClick,
+                        onClick = actions.onBackClick,
                         modifier = Modifier
                             .statusBarsPadding()
                             .padding(start = InterCommerceStyles.paddingMedium)
@@ -215,6 +258,13 @@ private fun ProductDetailContent(
                         )
                     }
                 },
+                actions = {
+                    CartBadge(
+                        count = cartCount,
+                        onCartClick = actions.onCartClick,
+                        modifier = Modifier.statusBarsPadding()
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                     scrolledContainerColor = Color.Transparent
@@ -223,20 +273,30 @@ private fun ProductDetailContent(
         }
     }
 
-    // Image Preview Dialog
     selectedImageIndex?.let { index ->
         ProductImagePreviewDialog(
             images = product.images,
             initialIndex = index,
-            onDismiss = { selectedImageIndex = null }
+            onDismiss = { }
         )
     }
 }
 
 @Composable
 private fun AddToBagButton(
+    state: CartButtonState,
     onClick: () -> Unit
 ) {
+    val loadingAlpha = InterCommerceStyles.BUTTON_LOADING_ALPHA
+    val backgroundColor by animateColorAsState(
+        targetValue = when (state) {
+            CartButtonState.Idle -> MaterialTheme.colorScheme.primary
+            CartButtonState.Loading -> MaterialTheme.colorScheme.primary.copy(alpha = loadingAlpha)
+            CartButtonState.Success -> InterCommerceStyles.successColor
+        },
+        label = "button_color"
+    )
+
     Surface(
         tonalElevation = InterCommerceStyles.shadowElevation,
         shadowElevation = InterCommerceStyles.shadowElevation,
@@ -251,13 +311,46 @@ private fun AddToBagButton(
             Button(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),
-                shape = InterCommerceStyles.buttonShape
+                shape = InterCommerceStyles.buttonShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = backgroundColor,
+                    disabledContainerColor = backgroundColor,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                enabled = state == CartButtonState.Idle
             ) {
-                Text(
-                    text = stringResource(R.string.product_detail_add_to_cart),
-                    modifier = Modifier.padding(vertical = InterCommerceStyles.paddingSmall),
-                    fontWeight = FontWeight.Bold
-                )
+                AnimatedContent(
+                    targetState = state,
+                    transitionSpec = {
+                        fadeIn() togetherWith fadeOut()
+                    },
+                    label = "button_content"
+                ) { targetState ->
+                    when (targetState) {
+                        CartButtonState.Idle -> {
+                            Text(
+                                text = stringResource(R.string.product_detail_add_to_cart),
+                                modifier = Modifier.padding(vertical = InterCommerceStyles.paddingSmall),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        CartButtonState.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(InterCommerceStyles.loaderSize),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = InterCommerceStyles.loaderStrokeWidth
+                            )
+                        }
+                        CartButtonState.Success -> {
+                            Text(
+                                text = stringResource(R.string.product_detail_added_to_cart),
+                                modifier = Modifier.padding(vertical = InterCommerceStyles.paddingSmall),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
             }
         }
     }

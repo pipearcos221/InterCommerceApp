@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cart_app_bar_title">Bag</string>
+    <string name="cart_qty_label">Qty %d</string>
+    <string name="cart_subtotal_label">Subtotal</string>
+    <string name="cart_discount_label">Discount</string>
+    <string name="cart_shipping_label">Shipping</string>
+    <string name="cart_shipping_value">Standard - Free</string>
+    <string name="cart_total_label">Total</string>
+    <string name="cart_checkout_button">Checkout</string>
+    <string name="cart_empty_message">Your bag is empty.</string>
+    <string name="cart_plus_label">+</string>
+    <string name="cart_minus_label">−</string>
+    <string name="cart_price_format">$%1$.2f</string>
+    <string name="cart_discount_price_format">−$%1$.2f</string>
+    <string name="cart_checkout_success_message">Transaction Successful</string>
+</resources>

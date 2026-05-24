@@ -19,21 +19,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
-import co.com.pipearcos221.intercommerceapp.feature.catalog.R
+import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import coil.compose.AsyncImage
+import java.util.Locale
 
 @Composable
 fun ProductCard(
@@ -64,6 +66,28 @@ fun ProductCard(
                     modifier = Modifier.fillMaxWidth(),
                     contentScale = ContentScale.Crop
                 )
+
+                if (product.discountPercentage > InterCommerceStyles.ZERO_PERCENTAGE) {
+                    Surface(
+                        color = InterCommerceStyles.discountBackgroundColor,
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .padding(InterCommerceStyles.paddingMedium)
+                            .align(Alignment.TopEnd)
+                    ) {
+                        Text(
+                            text = "-${product.discountPercentage.toInt()}%",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = InterCommerceStyles.discountTextColor,
+                            modifier = Modifier.padding(
+                                horizontal = InterCommerceStyles.paddingMedium, 
+                                vertical = InterCommerceStyles.paddingSmall / 
+                                        InterCommerceStyles.HALVED_FACTOR
+                            ),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
             Column(
                 modifier = Modifier
@@ -90,12 +114,23 @@ fun ProductCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(R.string.catalog_price_format, product.price.toString()),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Column {
+                        Text(
+                            text = "$${String.format(Locale.US, "%.2f", product.priceWithDiscount)}",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (product.discountPercentage > InterCommerceStyles.ZERO_PERCENTAGE) 
+                                InterCommerceStyles.successColor else MaterialTheme.colorScheme.primary
+                        )
+                        if (product.discountPercentage > InterCommerceStyles.ZERO_PERCENTAGE) {
+                            Text(
+                                text = "$${String.format(Locale.US, "%.2f", product.price)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                textDecoration = TextDecoration.LineThrough,
+                                color = Color.Gray
+                            )
+                        }
+                    }
                     
                     IconButton(
                         onClick = {

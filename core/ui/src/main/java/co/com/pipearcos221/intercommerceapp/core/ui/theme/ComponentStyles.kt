@@ -56,17 +56,16 @@ object InterCommerceStyles {
     const val MIN_IMAGES_FOR_INDICATOR = 1
     
     // Animation & State Constants
-    const val CART_ANIMATION_DELAY = 1500L
+    const val CART_ANIMATION_DELAY = 500L
+    const val BUTTON_RESET_DELAY = 1500L
     const val BUTTON_LOADING_ALPHA = 0.7f
     val loaderSize = 24.dp
     val loaderStrokeWidth = 2.dp
-    val successIconSize = 18.dp
     
     // Colors (Design Tokens)
     val successColor = Color(0xFF2E7D32)
     val discountBackgroundColor = Color(0xFFE8F5E9)
     val discountTextColor = Color(0xFF2E7D32)
-    val overlayAlpha = 0.5f
     val overlayLightAlpha = 0.2f
     val shadowElevation = 8.dp
     
@@ -98,4 +97,17 @@ object InterCommerceStyles {
     // Logic Constants
     const val EMPTY_COUNT = 0
     const val SINGLE_LINE = 1
+    const val FLOW_SUBSCRIPTION_TIMEOUT_MS = 5000L
+    const val SHIPPING_COST_FREE = 0.0
+    
+    // Cart Specific
+    val cartImageSize = 100.dp
+    val checkoutButtonHeight = 60.dp
+    val emptyCartIconSize = 100.dp
+    val checkoutSuccessIconSize = 120.dp
+    
+    // Animation Values
+    const val SCALE_INITIAL = 0f
+    const val SCALE_PEAK = 1.2f
+    const val SCALE_FINAL = 1f
 }
