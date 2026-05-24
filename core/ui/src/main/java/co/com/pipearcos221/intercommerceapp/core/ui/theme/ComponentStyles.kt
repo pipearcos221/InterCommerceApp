@@ -23,6 +23,7 @@ object InterCommerceStyles {
     
     // Grid & Layout
     val adaptiveGridMinSize = 160.dp
+    const val ASPECT_RATIO_SQUARE = 1f
     const val PRODUCT_CARD_ASPECT_RATIO = 0.9f
     val errorIconSize = 80.dp
     val quickAddButtonSize = 32.dp
@@ -36,6 +37,48 @@ object InterCommerceStyles {
     const val SKELETON_TITLE_WIDTH_RATIO = 0.7f
     const val SKELETON_BRAND_WIDTH_RATIO = 0.4f
     const val SKELETON_ITEM_COUNT = 10
+    
+    // Product Detail Specific
+    val skeletonDetailCategoryWidth = 100.dp
+    val skeletonDetailCategoryHeight = 16.dp
+    val skeletonDetailTitleHeight = 32.dp
+    val skeletonDetailPriceWidth = 120.dp
+    val skeletonDetailPriceHeight = 24.dp
+    val skeletonDetailLineHeight = 16.dp
+    val immersiveBottomSpacing = 100.dp
+    const val DETAIL_TITLE_WIDTH_RATIO = 0.7f
+    const val DETAIL_DESCRIPTION_LINES = 5
+    
+    // Carousel Indicators
+    val carouselIndicatorRowHeight = 50.dp
+    val carouselIndicatorSize = 8.dp
+    val carouselIndicatorPadding = 2.dp
+    const val MIN_IMAGES_FOR_INDICATOR = 1
+    
+    // Animation & State Constants
+    const val CART_ANIMATION_DELAY = 1500L
+    const val BUTTON_LOADING_ALPHA = 0.7f
+    val loaderSize = 24.dp
+    val loaderStrokeWidth = 2.dp
+    val successIconSize = 18.dp
+    
+    // Colors (Design Tokens)
+    val successColor = Color(0xFF2E7D32)
+    val discountBackgroundColor = Color(0xFFE8F5E9)
+    val discountTextColor = Color(0xFF2E7D32)
+    val overlayAlpha = 0.5f
+    val overlayLightAlpha = 0.2f
+    val shadowElevation = 8.dp
+    
+    // Animation Ratios & Thresholds
+    const val PARALLAX_FACTOR = 0.5f
+    const val PARALLAX_FADE_THRESHOLD = 1000f
+    const val DESCRIPTION_LINE_HEIGHT_FACTOR = 1.2f
+    const val INDEX_DISPLAY_OFFSET = 1
+    const val ALPHA_FULL = 1f
+    const val ALPHA_TRANSPARENT = 0f
+    const val ZERO_PERCENTAGE = 0
+    const val HALVED_FACTOR = 2
     
     // Shimmer Animation Constants
     const val SHIMMER_DURATION_MS = 1200

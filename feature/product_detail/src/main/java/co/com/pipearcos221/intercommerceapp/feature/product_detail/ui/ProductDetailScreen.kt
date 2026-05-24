@@ -1,0 +1,264 @@
+package co.com.pipearcos221.intercommerceapp.feature.product_detail.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
+import co.com.pipearcos221.intercommerceapp.core.ui.component.ErrorScreen
+import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.R
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.ProductDetailUiState
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductDetailSkeleton
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImageCarousel
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImagePreviewDialog
+import co.com.pipearcos221.intercommerceapp.core.ui.R as Rcore
+
+@Composable
+fun ProductDetailScreen(
+    uiState: ProductDetailUiState,
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        when (uiState) {
+            is ProductDetailUiState.Loading -> {
+                ProductDetailSkeleton()
+            }
+            is ProductDetailUiState.Success -> {
+                ProductDetailContent(
+                    product = uiState.product,
+                    onBackClick = onBackClick
+                )
+            }
+            is ProductDetailUiState.Error -> {
+                ErrorScreen(
+                    message = uiState.message.asString(),
+                    icon = Icons.Default.Warning,
+                    onAction = onBackClick
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProductDetailContent(
+    product: Product,
+    onBackClick: () -> Unit
+) {
+    val scrollState = rememberScrollState()
+    var selectedImageIndex by remember { mutableStateOf<Int?>(null) }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            AddToBagButton(
+                onClick = { /* Comportamiento futuro */ }
+            )
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+            ) {
+                ProductImageCarousel(
+                    images = product.images,
+                    productId = product.id,
+                    onImageClick = { index -> selectedImageIndex = index },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(InterCommerceStyles.ASPECT_RATIO_SQUARE)
+                        .graphicsLayer {
+                            translationY = scrollState.value * InterCommerceStyles.PARALLAX_FACTOR
+                            alpha = (InterCommerceStyles.ALPHA_FULL - (scrollState.value.toFloat() / 
+                                    InterCommerceStyles.PARALLAX_FADE_THRESHOLD))
+                                .coerceIn(InterCommerceStyles.ALPHA_TRANSPARENT, 
+                                    InterCommerceStyles.ALPHA_FULL)
+                        }
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.extraLarge)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(InterCommerceStyles.paddingLarge)
+                ) {
+                    Text(
+                        text = product.category.uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = product.title,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = InterCommerceStyles.paddingSmall)
+                    )
+                    Text(
+                        text = product.brand,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = InterCommerceStyles.paddingLarge),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(InterCommerceStyles.paddingMedium)
+                    ) {
+                        Text(
+                            text = stringResource(Rcore.string.price_format, product.price.toString()),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        if (product.discountPercentage > InterCommerceStyles.ZERO_PERCENTAGE) {
+                            Surface(
+                                color = InterCommerceStyles.discountBackgroundColor,
+                                shape = CircleShape
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.product_detail_discount_format,
+                                        "${product.discountPercentage}%"
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = InterCommerceStyles.discountTextColor,
+                                    modifier = Modifier.padding(
+                                        horizontal = InterCommerceStyles.paddingMedium, 
+                                        vertical = InterCommerceStyles.paddingSmall / 
+                                                InterCommerceStyles.HALVED_FACTOR
+                                    ),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(InterCommerceStyles.paddingLarge))
+
+                    Text(
+                        text = stringResource(R.string.product_detail_description_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = product.description,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(top = InterCommerceStyles.paddingSmall),
+                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 
+                                InterCommerceStyles.DESCRIPTION_LINE_HEIGHT_FACTOR
+                    )
+
+                    val bottomSpacing = innerPadding.calculateBottomPadding() + 
+                            InterCommerceStyles.immersiveBottomSpacing
+                    Spacer(modifier = Modifier.height(bottomSpacing))
+                }
+            }
+
+            TopAppBar(
+                title = { },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier
+                            .statusBarsPadding()
+                            .padding(start = InterCommerceStyles.paddingMedium)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.product_detail_back_desc),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent
+                )
+            )
+        }
+    }
+
+    // Image Preview Dialog
+    selectedImageIndex?.let { index ->
+        ProductImagePreviewDialog(
+            images = product.images,
+            initialIndex = index,
+            onDismiss = { selectedImageIndex = null }
+        )
+    }
+}
+
+@Composable
+private fun AddToBagButton(
+    onClick: () -> Unit
+) {
+    Surface(
+        tonalElevation = InterCommerceStyles.shadowElevation,
+        shadowElevation = InterCommerceStyles.shadowElevation,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(InterCommerceStyles.paddingLarge)
+        ) {
+            Button(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = InterCommerceStyles.buttonShape
+            ) {
+                Text(
+                    text = stringResource(R.string.product_detail_add_to_cart),
+                    modifier = Modifier.padding(vertical = InterCommerceStyles.paddingSmall),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
