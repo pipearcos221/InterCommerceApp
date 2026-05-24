@@ -19,11 +19,14 @@ data class CartEntity(
     @ColumnInfo(name = "image_url")
     val imageUrl: String,
     
-    @ColumnInfo(name = "current_price")
-    val currentPrice: Double,
-    
     @ColumnInfo(name = "original_price")
-    val originalPrice: Double?,
+    val originalPrice: Double,
+    
+    @ColumnInfo(name = "discount_percentage")
+    val discountPercentage: Double,
+    
+    @ColumnInfo(name = "price_with_discount")
+    val priceWithDiscount: Double,
     
     @ColumnInfo(name = "quantity")
     val quantity: Int
