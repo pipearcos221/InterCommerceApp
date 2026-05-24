@@ -23,6 +23,7 @@ object InterCommerceStyles {
     
     // Grid & Layout
     val adaptiveGridMinSize = 160.dp
+    const val ASPECT_RATIO_SQUARE = 1f
     const val PRODUCT_CARD_ASPECT_RATIO = 0.9f
     val errorIconSize = 80.dp
     val quickAddButtonSize = 32.dp
@@ -36,6 +37,17 @@ object InterCommerceStyles {
     const val SKELETON_TITLE_WIDTH_RATIO = 0.7f
     const val SKELETON_BRAND_WIDTH_RATIO = 0.4f
     const val SKELETON_ITEM_COUNT = 10
+    
+    // Product Detail Specific
+    val skeletonDetailCategoryWidth = 100.dp
+    val skeletonDetailCategoryHeight = 16.dp
+    val skeletonDetailTitleHeight = 32.dp
+    val skeletonDetailPriceWidth = 120.dp
+    val skeletonDetailPriceHeight = 24.dp
+    val skeletonDetailLineHeight = 16.dp
+    val immersiveBottomSpacing = 100.dp
+    const val DETAIL_TITLE_WIDTH_RATIO = 0.7f
+    const val DETAIL_DESCRIPTION_LINES = 5
     
     // Shimmer Animation Constants
     const val SHIMMER_DURATION_MS = 1200
