@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
 import co.com.pipearcos221.intercommerceapp.core.ui.component.CartBadge
 import co.com.pipearcos221.intercommerceapp.core.ui.component.ErrorScreen
@@ -59,7 +60,7 @@ import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductDetailSkeleton
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImageCarousel
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImagePreviewDialog
-import co.com.pipearcos221.intercommerceapp.core.ui.R as Rcore
+import java.util.Locale
 
 @Composable
 fun ProductDetailScreen(
@@ -174,11 +175,19 @@ private fun ProductDetailContent(
                         horizontalArrangement = Arrangement.spacedBy(InterCommerceStyles.paddingMedium)
                     ) {
                         Text(
-                            text = stringResource(Rcore.string.price_format, product.price.toString()),
+                            text = "$" + String.format(Locale.US, "%.2f", product.priceWithDiscount),
                             style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.ExtraBold
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (product.discountPercentage > InterCommerceStyles.ZERO_PERCENTAGE) 
+                                InterCommerceStyles.successColor else MaterialTheme.colorScheme.onSurface
                         )
                         if (product.discountPercentage > InterCommerceStyles.ZERO_PERCENTAGE) {
+                            Text(
+                                text = "$" + String.format(Locale.US, "%.2f", product.price),
+                                style = MaterialTheme.typography.titleMedium,
+                                textDecoration = TextDecoration.LineThrough,
+                                color = Color.Gray
+                            )
                             Surface(
                                 color = InterCommerceStyles.discountBackgroundColor,
                                 shape = CircleShape
@@ -186,7 +195,7 @@ private fun ProductDetailContent(
                                 Text(
                                     text = stringResource(
                                         R.string.product_detail_discount_format,
-                                        "${product.discountPercentage}%"
+                                        "${product.discountPercentage.toInt()}%"
                                     ),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = InterCommerceStyles.discountTextColor,
@@ -253,7 +262,6 @@ private fun ProductDetailContent(
         }
     }
 
-    // Image Preview Dialog
     selectedImageIndex?.let { index ->
         ProductImagePreviewDialog(
             images = product.images,
