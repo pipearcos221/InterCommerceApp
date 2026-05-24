@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,10 +46,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
 import co.com.pipearcos221.intercommerceapp.core.ui.component.ErrorScreen
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
@@ -62,6 +61,9 @@ import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImagePreviewDialog
 import co.com.pipearcos221.intercommerceapp.core.ui.R as Rcore
 
+/**
+ * Main Product Detail Screen with immersive design and premium animations.
+ */
 @Composable
 fun ProductDetailScreen(
     uiState: ProductDetailUiState,
@@ -234,8 +236,8 @@ private fun ProductDetailContent(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = androidx.compose.ui.graphics.Color.Transparent,
-                    scrolledContainerColor = androidx.compose.ui.graphics.Color.Transparent
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = Color.Transparent
                 )
             )
         }
@@ -281,7 +283,12 @@ private fun AddToBagButton(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),
                 shape = InterCommerceStyles.buttonShape,
-                colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = backgroundColor,
+                    disabledContainerColor = backgroundColor,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 enabled = state == CartButtonState.Idle
             ) {
                 AnimatedContent(
@@ -307,18 +314,11 @@ private fun AddToBagButton(
                             )
                         }
                         CartButtonState.Success -> {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(InterCommerceStyles.successIconSize)
-                                )
-                                Spacer(modifier = Modifier.width(InterCommerceStyles.paddingMedium))
-                                Text(
-                                    text = stringResource(R.string.product_detail_added_to_cart),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                            Text(
+                                text = stringResource(R.string.product_detail_added_to_cart),
+                                modifier = Modifier.padding(vertical = InterCommerceStyles.paddingSmall),
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }

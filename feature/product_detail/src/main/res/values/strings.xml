@@ -6,5 +6,5 @@
     <string name="product_detail_favorite_desc">Add to favorites</string>
     <string name="product_detail_discount_format">%1$s OFF</string>
     <string name="product_detail_description_title">Description</string>
-    <string name="product_detail_added_to_cart">Added to Bag ✔</string>
+    <string name="product_detail_added_to_cart">Added to Bag</string>
 </resources>
