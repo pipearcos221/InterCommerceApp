@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
 import co.com.pipearcos221.intercommerceapp.core.domain.repository.CartRepository
-import co.com.pipearcos221.intercommerceapp.core.domain.usecase.AddToCartUseCase
 import co.com.pipearcos221.intercommerceapp.core.domain.usecase.GetProductDetailUseCase
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.ProductDetailRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
@@ -30,7 +29,6 @@ enum class CartButtonState {
 @HiltViewModel
 class ProductDetailViewModel @Inject constructor(
     private val getProductDetailUseCase: GetProductDetailUseCase,
-    private val addToCartUseCase: AddToCartUseCase,
     private val cartRepository: CartRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -79,7 +77,7 @@ class ProductDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _cartButtonState.value = CartButtonState.Loading
 
-            addToCartUseCase(product)
+            cartRepository.addToCart(product)
             delay(InterCommerceStyles.CART_ANIMATION_DELAY)
             
             _cartButtonState.value = CartButtonState.Success

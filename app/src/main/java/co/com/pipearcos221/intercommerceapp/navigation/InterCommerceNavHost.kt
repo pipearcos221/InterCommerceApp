@@ -1,19 +1,9 @@
 package co.com.pipearcos221.intercommerceapp.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -22,9 +12,10 @@ import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CartRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CatalogRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CheckoutSuccessRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.ProductDetailRoute
-import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import co.com.pipearcos221.intercommerceapp.feature.cart.presentation.CartViewModel
 import co.com.pipearcos221.intercommerceapp.feature.cart.ui.CartScreen
+import co.com.pipearcos221.intercommerceapp.feature.cart.ui.CheckoutSuccessScreen
+import co.com.pipearcos221.intercommerceapp.feature.catalog.presentation.CatalogViewModel
 import co.com.pipearcos221.intercommerceapp.feature.catalog.ui.CatalogScreen
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.ProductDetailViewModel
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.ProductDetailActions
@@ -41,8 +32,9 @@ fun InterCommerceNavHost(
         modifier = modifier,
     ) {
         composable<CatalogRoute> {
+            val viewModel: CatalogViewModel = hiltViewModel()
             CatalogScreen(
-                viewModel = hiltViewModel(),
+                viewModel = viewModel,
                 onProductClick = { productId ->
                     navController.navigate(ProductDetailRoute(productId = productId))
                 },
@@ -80,22 +72,21 @@ fun InterCommerceNavHost(
                 onUpdateQuantity = { id, qty -> viewModel.updateQuantity(id, qty) },
                 onRemoveItem = { id -> viewModel.removeItem(id) },
                 onCheckout = { 
-                    viewModel.checkout()
-                    navController.navigate(CheckoutSuccessRoute) {
-                        popUpTo(CatalogRoute) { inclusive = false }
-                    }
+                    navController.navigate(CheckoutSuccessRoute)
                 }
             )
         }
 
         composable<CheckoutSuccessRoute> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = "Order Placed Successfully! 🎉",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            val viewModel: CartViewModel = hiltViewModel()
+            CheckoutSuccessScreen(
+                onFinished = {
+                    viewModel.checkout()
+                    navController.navigate(CatalogRoute) {
+                        popUpTo(CatalogRoute) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

@@ -14,17 +14,18 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CatalogViewModel @Inject constructor(
     getProductsUseCase: GetProductsUseCase,
-    cartRepository: CartRepository
+    private val cartRepository: CartRepository
 ) : ViewModel() {
 
     val productsFlow: Flow<PagingData<Product>> = getProductsUseCase()
         .cachedIn(viewModelScope)
-    
+
     val cartItemsCount: StateFlow<Int> = cartRepository.getCartItems()
         .map { items -> 
             items.sumOf { it.quantity } 
@@ -34,4 +35,10 @@ class CatalogViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(InterCommerceStyles.FLOW_SUBSCRIPTION_TIMEOUT_MS),
             initialValue = InterCommerceStyles.EMPTY_COUNT
         )
+
+    fun addProductToCart(product: Product) {
+        viewModelScope.launch {
+            cartRepository.addToCart(product)
+        }
+    }
 }

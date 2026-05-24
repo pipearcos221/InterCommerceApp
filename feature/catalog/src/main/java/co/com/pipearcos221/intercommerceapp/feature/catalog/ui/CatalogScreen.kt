@@ -96,7 +96,7 @@ fun CatalogScreen(
                         pagingItems = pagingItems,
                         contentPadding = innerPadding,
                         onProductClick = onProductClick,
-                        onAddToCart = { /* TODO: Quick Add */ }
+                        onAddToCart = { product -> viewModel.addProductToCart(product) }
                     )
                 }
             }

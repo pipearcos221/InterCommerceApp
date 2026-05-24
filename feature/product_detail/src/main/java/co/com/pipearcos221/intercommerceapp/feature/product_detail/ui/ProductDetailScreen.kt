@@ -47,6 +47,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -60,6 +62,7 @@ import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductDetailSkeleton
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImageCarousel
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImagePreviewDialog
+import androidx.compose.runtime.LaunchedEffect
 import java.util.Locale
 
 data class ProductDetailActions(
@@ -76,6 +79,14 @@ fun ProductDetailScreen(
     actions: ProductDetailActions,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
+
+    LaunchedEffect(cartButtonState) {
+        if (cartButtonState == CartButtonState.Success) {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         when (uiState) {
             is ProductDetailUiState.Loading -> {
@@ -266,7 +277,7 @@ private fun ProductDetailContent(
         ProductImagePreviewDialog(
             images = product.images,
             initialIndex = index,
-            onDismiss = { selectedImageIndex = null }
+            onDismiss = { }
         )
     }
 }

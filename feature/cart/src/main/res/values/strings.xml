@@ -13,4 +13,5 @@
     <string name="cart_minus_label">−</string>
     <string name="cart_price_format">$%1$.2f</string>
     <string name="cart_discount_price_format">−$%1$.2f</string>
+    <string name="cart_checkout_success_message">Transaction Successful</string>
 </resources>
