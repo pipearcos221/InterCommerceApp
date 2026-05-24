@@ -14,6 +14,10 @@ import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CatalogRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.ProductDetailRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceAppTheme
 import co.com.pipearcos221.intercommerceapp.feature.catalog.ui.CatalogScreen
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.ProductDetailViewModel
+import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.ProductDetailScreen
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -46,7 +50,15 @@ fun InterCommerceApp() {
                 }
             )
         }
-        
-        // El destino ProductDetailRoute se implementará en el siguiente módulo
+
+        composable<ProductDetailRoute> {
+            val viewModel: ProductDetailViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsState()
+            
+            ProductDetailScreen(
+                uiState = uiState,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
     }
 }

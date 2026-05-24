@@ -77,6 +77,8 @@ object InterCommerceStyles {
     const val INDEX_DISPLAY_OFFSET = 1
     const val ALPHA_FULL = 1f
     const val ALPHA_TRANSPARENT = 0f
+    const val ZERO_PERCENTAGE = 0
+    const val HALVED_FACTOR = 2
     
     // Shimmer Animation Constants
     const val SHIMMER_DURATION_MS = 1200
