@@ -94,6 +94,7 @@ object InterCommerceStyles {
     const val EMPTY_COUNT = 0
     const val SINGLE_LINE = 1
     const val FLOW_SUBSCRIPTION_TIMEOUT_MS = 5000L
+    const val SEARCH_DEBOUNCE_MS = 300L
     const val SHIPPING_COST_FREE = 0.0
     const val NAVIGATION_TRANSITION_DURATION = 400
     

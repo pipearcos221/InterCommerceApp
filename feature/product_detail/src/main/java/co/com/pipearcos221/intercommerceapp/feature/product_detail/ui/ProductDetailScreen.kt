@@ -295,7 +295,7 @@ private fun ProductDetailContent(
         ProductImagePreviewDialog(
             images = product.images,
             initialIndex = index,
-            onDismiss = { }
+            onDismiss = { selectedImageIndex = null }
         )
     }
 }
@@ -308,8 +308,8 @@ private fun AddToBagButton(
     val loadingAlpha = InterCommerceStyles.BUTTON_LOADING_ALPHA
     val backgroundColor by animateColorAsState(
         targetValue = when (state) {
-            CartButtonState.Idle -> MaterialTheme.colorScheme.primary
-            CartButtonState.Loading -> MaterialTheme.colorScheme.primary.copy(alpha = loadingAlpha)
+            CartButtonState.Idle -> Color.Black
+            CartButtonState.Loading -> Color.Black.copy(alpha = loadingAlpha)
             CartButtonState.Success -> InterCommerceStyles.successColor
         },
         label = "button_color"
@@ -328,13 +328,15 @@ private fun AddToBagButton(
         ) {
             Button(
                 onClick = onClick,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(InterCommerceStyles.checkoutButtonHeight),
                 shape = InterCommerceStyles.buttonShape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = backgroundColor,
                     disabledContainerColor = backgroundColor,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor = Color.White,
+                    disabledContentColor = Color.White
                 ),
                 enabled = state == CartButtonState.Idle
             ) {
@@ -349,21 +351,21 @@ private fun AddToBagButton(
                         CartButtonState.Idle -> {
                             Text(
                                 text = stringResource(R.string.product_detail_add_to_cart),
-                                modifier = Modifier.padding(vertical = InterCommerceStyles.paddingSmall),
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                         CartButtonState.Loading -> {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(InterCommerceStyles.loaderSize),
-                                color = MaterialTheme.colorScheme.onPrimary,
+                                color = Color.White,
                                 strokeWidth = InterCommerceStyles.loaderStrokeWidth
                             )
                         }
                         CartButtonState.Success -> {
                             Text(
                                 text = stringResource(R.string.product_detail_added_to_cart),
-                                modifier = Modifier.padding(vertical = InterCommerceStyles.paddingSmall),
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                         }
