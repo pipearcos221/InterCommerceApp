@@ -14,13 +14,18 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.paging.LoadState
@@ -28,6 +33,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import co.com.pipearcos221.intercommerceapp.core.domain.error.AppException
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
 import co.com.pipearcos221.intercommerceapp.core.ui.component.CartBadge
 import co.com.pipearcos221.intercommerceapp.core.ui.component.ErrorScreen
@@ -46,11 +52,35 @@ fun CatalogScreen(
     onCartClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val pagingItems = viewModel.productsFlow.collectAsLazyPagingItems()
-    val cartCount by viewModel.cartItemsCount.collectAsState()
+    
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    
+    val loadState = pagingItems.loadState
+    LaunchedEffect(loadState.refresh, loadState.append) {
+        val errorState = when {
+            loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
+            loadState.append is LoadState.Error -> loadState.append as LoadState.Error
+            else -> null
+        }
+
+        errorState?.let {
+            if (pagingItems.itemCount > InterCommerceStyles.EMPTY_COUNT) {
+                val message = if (it.error is AppException.NetworkException) {
+                    context.getString(Rcore.string.error_no_internet_cached)
+                } else {
+                    it.error.localizedMessage ?: context.getString(Rcore.string.error_unknown)
+                }
+                snackbarHostState.showSnackbar(message)
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -62,7 +92,7 @@ fun CatalogScreen(
                 },
                 actions = {
                     CartBadge(
-                        count = cartCount,
+                        count = uiState.cartCount,
                         onCartClick = onCartClick
                     )
                 }
@@ -88,7 +118,7 @@ fun CatalogScreen(
 
             else -> {
                 PullToRefreshBox(
-                    isRefreshing = false,
+                    isRefreshing = refreshState is LoadState.Loading,
                     onRefresh = { pagingItems.refresh() },
                     modifier = Modifier.fillMaxSize()
                 ) {

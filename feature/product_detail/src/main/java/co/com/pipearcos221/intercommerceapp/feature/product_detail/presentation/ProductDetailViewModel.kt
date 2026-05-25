@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,7 +36,7 @@ class ProductDetailViewModel @Inject constructor(
 
     private val route = savedStateHandle.toRoute<ProductDetailRoute>()
 
-    private val _uiState = MutableStateFlow<ProductDetailUiState>(ProductDetailUiState.Loading)
+    private val _uiState = MutableStateFlow(ProductDetailUiState(isLoading = true))
     val uiState: StateFlow<ProductDetailUiState> = _uiState.asStateFlow()
 
     private val _cartButtonState = MutableStateFlow(CartButtonState.Idle)
@@ -53,21 +54,22 @@ class ProductDetailViewModel @Inject constructor(
         loadProduct(route.productId)
     }
 
-    private fun loadProduct(id: Int) {
+    fun loadProduct(id: Int) {
         viewModelScope.launch {
-            _uiState.value = ProductDetailUiState.Loading
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             
-            getProductDetailUseCase(id)
-                .onSuccess { product ->
-                    _uiState.value = ProductDetailUiState.Success(product)
+            getProductDetailUseCase(id).collect { result ->
+                result.onSuccess { product ->
+                    _uiState.update { it.copy(product = product, isLoading = false) }
                 }
-                .onFailure { exception ->
+                result.onFailure { exception ->
                     val message = exception.localizedMessage?.let { 
                         UiText.DynamicString(it) 
                     } ?: UiText.ResourceString(Rcore.string.error_unknown)
                     
-                    _uiState.value = ProductDetailUiState.Error(message)
+                    _uiState.update { it.copy(errorMessage = message, isLoading = false) }
                 }
+            }
         }
     }
 
@@ -76,10 +78,8 @@ class ProductDetailViewModel @Inject constructor(
 
         viewModelScope.launch {
             _cartButtonState.value = CartButtonState.Loading
-
             cartRepository.addToCart(product)
             delay(InterCommerceStyles.CART_ANIMATION_DELAY)
-            
             _cartButtonState.value = CartButtonState.Success
             delay(InterCommerceStyles.BUTTON_RESET_DELAY)
             _cartButtonState.value = CartButtonState.Idle

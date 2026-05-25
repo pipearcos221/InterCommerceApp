@@ -4,10 +4,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-/**
- * Design system tokens para InterCommerce App.
- * Centraliza dimensiones y formas para evitar "Magic Numbers".
- */
 object InterCommerceStyles {
     // Shapes
     val cardShape = RoundedCornerShape(16.dp)
@@ -99,6 +95,7 @@ object InterCommerceStyles {
     const val SINGLE_LINE = 1
     const val FLOW_SUBSCRIPTION_TIMEOUT_MS = 5000L
     const val SHIPPING_COST_FREE = 0.0
+    const val NAVIGATION_TRANSITION_DURATION = 400
     
     // Cart Specific
     val cartImageSize = 100.dp

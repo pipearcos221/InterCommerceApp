@@ -1,11 +1,11 @@
 package co.com.pipearcos221.intercommerceapp.core.data.repository
 
-import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import co.com.pipearcos221.intercommerceapp.core.data.mapper.toEntity
+import co.com.pipearcos221.intercommerceapp.core.data.util.mapToAppException
 import co.com.pipearcos221.intercommerceapp.core.database.dao.ProductDao
 import co.com.pipearcos221.intercommerceapp.core.database.entity.ProductEntity
 import co.com.pipearcos221.intercommerceapp.core.network.api.ProductApiService
@@ -34,7 +34,6 @@ class ProductRemoteMediator(
                 }
             }
 
-            Log.d("RemoteMediator", "Loading products with limit=${state.config.pageSize} and skip=$loadKey")
             val response = apiService.getProducts(
                 limit = state.config.pageSize,
                 skip = loadKey
@@ -51,9 +50,8 @@ class ProductRemoteMediator(
                 endOfPaginationReached = response.products.isEmpty()
             )
         } catch (e: Exception) {
-            Log.e("RemoteMediator", "Error loading products", e)
             if (e is CancellationException) throw e
-            MediatorResult.Error(e)
+            MediatorResult.Error(mapToAppException(e))
         }
     }
 

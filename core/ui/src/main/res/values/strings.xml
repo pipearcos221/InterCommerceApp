@@ -3,6 +3,7 @@
     <string name="error_default_title">Oops!</string>
     <string name="error_action_retry">Try Again</string>
     <string name="error_unknown">An unknown error occurred</string>
+    <string name="error_no_internet_cached">No internet connection. Showing cached data.</string>
     <string name="error_product_id_missing">Product identifier not found</string>
     <string name="price_format">USD %1$s</string>
 </resources>

@@ -8,13 +8,16 @@ import androidx.paging.map
 import co.com.pipearcos221.intercommerceapp.core.data.di.qualifier.IoDispatcher
 import co.com.pipearcos221.intercommerceapp.core.data.mapper.toDomain
 import co.com.pipearcos221.intercommerceapp.core.data.mapper.toEntity
-import co.com.pipearcos221.intercommerceapp.core.data.util.safeCall
+import co.com.pipearcos221.intercommerceapp.core.data.util.safeApiCall
 import co.com.pipearcos221.intercommerceapp.core.database.dao.ProductDao
 import co.com.pipearcos221.intercommerceapp.core.domain.model.Product
 import co.com.pipearcos221.intercommerceapp.core.domain.repository.ProductRepository
 import co.com.pipearcos221.intercommerceapp.core.network.api.ProductApiService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -39,11 +42,25 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getProductById(id: Int): Result<Product> =
-        safeCall(dispatcher = ioDispatcher) { apiService.getProductById(id).toDomain() }
+    override fun getProductById(id: Int): Flow<Result<Product>> = flow {
+        val networkResult = safeApiCall(ioDispatcher) {
+            apiService.getProductById(id).toDomain()
+        }
+        if (networkResult.isSuccess) {
+            emit(networkResult)
+        } else {
+            val cachedProduct = productDao.getProductById(id).firstOrNull()?.toDomain()
+            if (cachedProduct != null) {
+                emit(Result.success(cachedProduct))
+                emit(Result.failure(networkResult.exceptionOrNull()!!))
+            } else {
+                emit(networkResult)
+            }
+        }
+    }.flowOn(ioDispatcher)
 
     override suspend fun syncProducts(): Result<Unit> =
-        safeCall(dispatcher = ioDispatcher) {
+        safeApiCall(dispatcher = ioDispatcher) {
             val response = apiService.getProducts(limit = PAGE_SIZE, skip = INITIAL_SKIP_INDEX)
             productDao.insertProducts(response.products.map { it.toEntity() })
         }

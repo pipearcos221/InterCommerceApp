@@ -1,5 +1,9 @@
 package co.com.pipearcos221.intercommerceapp.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -8,10 +12,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CartRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CatalogRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.CheckoutSuccessRoute
 import co.com.pipearcos221.intercommerceapp.core.ui.navigation.ProductDetailRoute
+import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import co.com.pipearcos221.intercommerceapp.feature.cart.presentation.CartViewModel
 import co.com.pipearcos221.intercommerceapp.feature.cart.ui.CartScreen
 import co.com.pipearcos221.intercommerceapp.feature.cart.ui.CheckoutSuccessScreen
@@ -44,7 +50,8 @@ fun InterCommerceNavHost(
             )
         }
 
-        composable<ProductDetailRoute> {
+        composable<ProductDetailRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<ProductDetailRoute>()
             val viewModel: ProductDetailViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsState()
             val cartButtonState by viewModel.cartButtonState.collectAsState()
@@ -57,7 +64,8 @@ fun InterCommerceNavHost(
                 actions = ProductDetailActions(
                     onBackClick = { navController.popBackStack() },
                     onCartClick = { navController.navigate(CartRoute) },
-                    onAddToCart = { product -> viewModel.addProductToCart(product) }
+                    onAddToCart = { product -> viewModel.addProductToCart(product) },
+                    onRetry = { viewModel.loadProduct(route.productId) }
                 )
             )
         }
