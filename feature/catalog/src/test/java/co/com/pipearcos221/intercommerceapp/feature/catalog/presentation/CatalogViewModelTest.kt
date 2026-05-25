@@ -22,6 +22,9 @@ import org.junit.Before
 import org.junit.Test
 import app.cash.turbine.test
 
+/**
+ * Unit tests for [CatalogViewModel] following BDD best practices.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class CatalogViewModelTest {
 
@@ -56,7 +59,7 @@ class CatalogViewModelTest {
     }
 
     @Test
-    fun `given items in cart when collect cartItemsCount then reflect total quantity`() = runTest {
+    fun `given items in cart when collect uiState then reflect cartCount`() = runTest {
         // GIVEN
         val product = createFakeProduct()
         val cartItems = listOf(
@@ -69,9 +72,9 @@ class CatalogViewModelTest {
         viewModel = CatalogViewModel(getProductsUseCase, cartRepository)
 
         // THEN
-        viewModel.cartItemsCount.test {
+        viewModel.uiState.test {
             val result = awaitItem()
-            assertEquals(5, result)
+            assertEquals(5, result.cartCount)
             cancelAndIgnoreRemainingEvents()
         }
     }

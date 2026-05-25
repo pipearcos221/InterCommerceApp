@@ -33,11 +33,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,13 +66,13 @@ import co.com.pipearcos221.intercommerceapp.feature.product_detail.presentation.
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductDetailSkeleton
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImageCarousel
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.ui.components.ProductImagePreviewDialog
-import androidx.compose.runtime.LaunchedEffect
 import java.util.Locale
 
 data class ProductDetailActions(
     val onBackClick: () -> Unit,
     val onCartClick: () -> Unit,
-    val onAddToCart: (Product) -> Unit
+    val onAddToCart: (Product) -> Unit,
+    val onRetry: () -> Unit
 )
 
 @Composable
@@ -80,6 +84,17 @@ fun ProductDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    LaunchedEffect(uiState.errorMessage) {
+        val errorMessage = uiState.errorMessage
+        if (errorMessage != null && uiState.product != null) {
+            snackbarHostState.showSnackbar(
+                message = errorMessage.asString(context)
+            )
+        }
+    }
 
     LaunchedEffect(cartButtonState) {
         if (cartButtonState == CartButtonState.Success) {
@@ -88,23 +103,24 @@ fun ProductDetailScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        when (uiState) {
-            is ProductDetailUiState.Loading -> {
+        when {
+            uiState.isLoading && uiState.product == null -> {
                 ProductDetailSkeleton()
             }
-            is ProductDetailUiState.Success -> {
+            uiState.errorMessage != null && uiState.product == null -> {
+                ErrorScreen(
+                    message = uiState.errorMessage.asString(),
+                    icon = Icons.Default.Warning,
+                    onAction = actions.onRetry
+                )
+            }
+            uiState.product != null -> {
                 ProductDetailContent(
                     product = uiState.product,
                     cartButtonState = cartButtonState,
                     cartCount = cartCount,
-                    actions = actions
-                )
-            }
-            is ProductDetailUiState.Error -> {
-                ErrorScreen(
-                    message = uiState.message.asString(),
-                    icon = Icons.Default.Warning,
-                    onAction = actions.onBackClick
+                    actions = actions,
+                    snackbarHostState = snackbarHostState
                 )
             }
         }
@@ -117,13 +133,15 @@ private fun ProductDetailContent(
     product: Product,
     cartButtonState: CartButtonState,
     cartCount: Int,
-    actions: ProductDetailActions
+    actions: ProductDetailActions,
+    snackbarHostState: SnackbarHostState
 ) {
     val scrollState = rememberScrollState()
     var selectedImageIndex by remember { mutableStateOf<Int?>(null) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             AddToBagButton(
                 state = cartButtonState,
