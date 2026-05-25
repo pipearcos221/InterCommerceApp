@@ -18,4 +18,9 @@ interface ProductApiService {
     suspend fun getProductById(
         @Path("id") id: Int
     ): ProductDto
+
+    @GET("products/search")
+    suspend fun searchProducts(
+        @Query("q") query: String
+    ): ProductResponseDto
 }

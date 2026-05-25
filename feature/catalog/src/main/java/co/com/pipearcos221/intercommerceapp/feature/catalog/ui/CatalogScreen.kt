@@ -2,16 +2,25 @@ package co.com.pipearcos221.intercommerceapp.feature.catalog.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -23,11 +32,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -54,6 +71,7 @@ fun CatalogScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val pagingItems = viewModel.productsFlow.collectAsLazyPagingItems()
+    var isSearchActive by remember { mutableStateOf(false) }
     
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -84,13 +102,33 @@ fun CatalogScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = stringResource(R.string.catalog_app_bar_title),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (!isSearchActive) {
+                        Text(
+                            text = stringResource(R.string.catalog_app_bar_title),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        SearchTextField(
+                            value = uiState.searchQuery,
+                            onValueChange = viewModel::onSearchQueryChanged,
+                            onCloseClick = { 
+                                isSearchActive = false
+                                viewModel.onSearchQueryChanged("")
+                                // Nota: Al enviar "", el ViewModel limpia automáticamente searchResults
+                            }
+                        )
+                    }
                 },
                 actions = {
+                    if (!isSearchActive) {
+                        IconButton(onClick = { isSearchActive = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = stringResource(R.string.catalog_search_hint)
+                            )
+                        }
+                    }
                     CartBadge(
                         count = uiState.cartCount,
                         onCartClick = onCartClick
@@ -103,10 +141,10 @@ fun CatalogScreen(
         val refreshState = pagingItems.loadState.refresh
 
         when {
-            refreshState is LoadState.Loading -> LoadingGrid(innerPadding)
+            refreshState is LoadState.Loading && !isSearchActive -> LoadingGrid(innerPadding)
 
             refreshState is LoadState.Error
-                    && pagingItems.itemCount == InterCommerceStyles.EMPTY_COUNT -> {
+                    && pagingItems.itemCount == InterCommerceStyles.EMPTY_COUNT && !isSearchActive -> {
                 ErrorScreen(
                     message = refreshState.error.localizedMessage
                         ?: stringResource(Rcore.string.error_unknown),
@@ -124,6 +162,8 @@ fun CatalogScreen(
                 ) {
                     ProductGrid(
                         pagingItems = pagingItems,
+                        searchResults = uiState.searchResults,
+                        isSearchActive = isSearchActive,
                         contentPadding = innerPadding,
                         onProductClick = onProductClick,
                         onAddToCart = { product -> viewModel.addProductToCart(product) }
@@ -135,8 +175,51 @@ fun CatalogScreen(
 }
 
 @Composable
+private fun SearchTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onCloseClick: () -> Unit
+) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(end = InterCommerceStyles.paddingMedium),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.weight(1f).focusRequester(focusRequester),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            decorationBox = { innerTextField ->
+                if (value.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.catalog_search_hint),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Gray
+                    )
+                }
+                innerTextField()
+            }
+        )
+        IconButton(onClick = onCloseClick) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(R.string.catalog_search_clear_desc),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
 private fun ProductGrid(
     pagingItems: LazyPagingItems<Product>,
+    searchResults: List<Product>?,
+    isSearchActive: Boolean,
     contentPadding: PaddingValues,
     onProductClick: (Int) -> Unit,
     onAddToCart: (Product) -> Unit,
@@ -155,24 +238,38 @@ private fun ProductGrid(
             CatalogHeader()
         }
 
-        items(
-            count = pagingItems.itemCount,
-            key = pagingItems.itemKey { it.id },
-            contentType = pagingItems.itemContentType { "Product" }
-        ) { index ->
-            val product = pagingItems[index]
-            if (product != null) {
+        // Lógica condicional quirúrgica para cambiar entre búsqueda y catálogo normal
+        if (isSearchActive && searchResults != null) {
+            items(
+                items = searchResults,
+                key = { it.id }
+            ) { product ->
                 ProductCard(
                     product = product,
                     onClick = { onProductClick(product.id) },
                     onAddToCart = onAddToCart
                 )
             }
-        }
+        } else {
+            items(
+                count = pagingItems.itemCount,
+                key = pagingItems.itemKey { it.id },
+                contentType = pagingItems.itemContentType { "Product" }
+            ) { index ->
+                val product = pagingItems[index]
+                if (product != null) {
+                    ProductCard(
+                        product = product,
+                        onClick = { onProductClick(product.id) },
+                        onAddToCart = onAddToCart
+                    )
+                }
+            }
 
-        if (pagingItems.loadState.append is LoadState.Loading) {
-            items(InterCommerceStyles.SKELETON_ITEM_COUNT) {
-                ProductCardSkeleton()
+            if (pagingItems.loadState.append is LoadState.Loading) {
+                items(InterCommerceStyles.SKELETON_ITEM_COUNT) {
+                    ProductCardSkeleton()
+                }
             }
         }
     }

@@ -4,5 +4,9 @@
     <string name="catalog_greeting_user">Good Morning, User</string>
     <string name="catalog_section_title">Top Picks for You</string>
     <string name="catalog_section_subtitle">Recommended products</string>
+    <string name="catalog_search_hint">Search products…</string>
+    <string name="catalog_search_clear_desc">Clear search</string>
+    <string name="catalog_search_empty_title">No results found</string>
+    <string name="catalog_search_empty_subtitle">No se encontraron productos para tu búsqueda</string>
     <string name="catalog_price_format">USD %s</string>
 </resources>

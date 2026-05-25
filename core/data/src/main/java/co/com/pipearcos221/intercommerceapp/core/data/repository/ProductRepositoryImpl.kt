@@ -59,6 +59,11 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }.flowOn(ioDispatcher)
 
+    override suspend fun searchProductsByQuery(query: String): Result<List<Product>> =
+        safeApiCall(dispatcher = ioDispatcher) {
+            apiService.searchProducts(query).products.map { it.toDomain() }
+        }
+
     override suspend fun syncProducts(): Result<Unit> =
         safeApiCall(dispatcher = ioDispatcher) {
             val response = apiService.getProducts(limit = PAGE_SIZE, skip = INITIAL_SKIP_INDEX)

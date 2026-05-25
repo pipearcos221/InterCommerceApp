@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.activity.compose.BackHandler
 import co.com.pipearcos221.intercommerceapp.core.ui.theme.InterCommerceStyles
 import co.com.pipearcos221.intercommerceapp.feature.product_detail.R
 import coil.compose.AsyncImage
@@ -44,6 +45,8 @@ fun ProductImagePreviewDialog(
             decorFitsSystemWindows = false
         )
     ) {
+        BackHandler(onBack = onDismiss)
+
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = Color.Black

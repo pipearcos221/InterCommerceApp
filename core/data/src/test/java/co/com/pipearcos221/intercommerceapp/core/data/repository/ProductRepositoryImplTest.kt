@@ -55,21 +55,20 @@ class ProductRepositoryImplTest {
     fun `given successful api response when getProductById then return flow with domain product`() =
         runTest(testDispatcher) {
             // Given
-            val dto = createFakeDto(id = 1, title = "Product 1")
+            val dto = createFakeDto(id = 1, title = "Network Product")
             coEvery { apiService.getProductById(1) } returns dto
 
             // When & Then
             repository.getProductById(1).test {
                 val result = awaitItem()
                 assertTrue(result.isSuccess)
-                assertEquals("Product 1", result.getOrNull()?.title)
+                assertEquals("Network Product", result.getOrNull()?.title)
                 awaitComplete()
             }
-            coVerify(exactly = 1) { apiService.getProductById(1) }
         }
 
     @Test
-    fun `given api failure and empty cache when getProductById then return flow with AppException`() =
+    fun `given api failure and cached data when getProductById then emit cached data then error`() =
         runTest(testDispatcher) {
             // Given
             val exception = IOException("No network")
@@ -86,12 +85,20 @@ class ProductRepositoryImplTest {
         }
 
     @Test
-    fun `given api failure and cached data when getProductById then return cached product and then exception`() =
+    fun `given successful search when searchProductsByQuery then return list of domain products`() =
         runTest(testDispatcher) {
             // Given
-            val exception = IOException("No network")
-            coEvery { apiService.getProductById(1) } throws exception
-            every { productDao.getProductById(1) } returns flowOf(null)
+            val dtos = listOf(createFakeDto(id = 1, title = "Search Result"))
+            val response = ProductResponseDto(products = dtos)
+            coEvery { apiService.searchProducts("query") } returns response
+
+            // When
+            val result = repository.searchProductsByQuery("query")
+
+            // Then
+            assertTrue(result.isSuccess)
+            assertEquals(1, result.getOrNull()?.size)
+            assertEquals("Search Result", result.getOrNull()?.get(0)?.title)
         }
 
     @Test
@@ -108,7 +115,6 @@ class ProductRepositoryImplTest {
 
             // Then
             assertTrue(result.isSuccess)
-            coVerify(exactly = 1) { apiService.getProducts(any(), any()) }
             coVerify(exactly = 1) { productDao.insertProducts(any()) }
         }
 

@@ -10,5 +10,7 @@ interface ProductRepository {
 
     fun getProductById(id: Int): Flow<Result<Product>>
 
+    suspend fun searchProductsByQuery(query: String): Result<List<Product>>
+
     suspend fun syncProducts(): Result<Unit>
 }
