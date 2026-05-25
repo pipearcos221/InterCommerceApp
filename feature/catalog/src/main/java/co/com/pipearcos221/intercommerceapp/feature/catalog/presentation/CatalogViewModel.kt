@@ -88,7 +88,12 @@ class CatalogViewModel @Inject constructor(
 
     fun onSearchQueryChanged(newQuery: String) {
         _searchQuery.value = newQuery
-        _uiState.update { it.copy(searchQuery = newQuery) }
+        _uiState.update { 
+            it.copy(
+                searchQuery = newQuery,
+                searchResults = if (newQuery.isBlank()) null else it.searchResults 
+            ) 
+        }
     }
 
     fun addProductToCart(product: Product) {

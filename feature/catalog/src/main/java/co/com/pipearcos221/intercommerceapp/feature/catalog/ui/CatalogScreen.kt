@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -71,6 +72,7 @@ fun CatalogScreen(
     val uiState by viewModel.uiState.collectAsState()
     val pagingItems = viewModel.productsFlow.collectAsLazyPagingItems()
     var isSearchActive by remember { mutableStateOf(false) }
+    
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     
@@ -109,12 +111,11 @@ fun CatalogScreen(
                     } else {
                         SearchTextField(
                             value = uiState.searchQuery,
-                            onValueChange = { query ->
-                                viewModel.onSearchQueryChanged(query)
-                            },
+                            onValueChange = viewModel::onSearchQueryChanged,
                             onCloseClick = { 
                                 isSearchActive = false
                                 viewModel.onSearchQueryChanged("")
+                                // Nota: Al enviar "", el ViewModel limpia automáticamente searchResults
                             }
                         )
                     }
@@ -140,10 +141,10 @@ fun CatalogScreen(
         val refreshState = pagingItems.loadState.refresh
 
         when {
-            refreshState is LoadState.Loading -> LoadingGrid(innerPadding)
+            refreshState is LoadState.Loading && !isSearchActive -> LoadingGrid(innerPadding)
 
             refreshState is LoadState.Error
-                    && pagingItems.itemCount == InterCommerceStyles.EMPTY_COUNT -> {
+                    && pagingItems.itemCount == InterCommerceStyles.EMPTY_COUNT && !isSearchActive -> {
                 ErrorScreen(
                     message = refreshState.error.localizedMessage
                         ?: stringResource(Rcore.string.error_unknown),
@@ -161,6 +162,8 @@ fun CatalogScreen(
                 ) {
                     ProductGrid(
                         pagingItems = pagingItems,
+                        searchResults = uiState.searchResults,
+                        isSearchActive = isSearchActive,
                         contentPadding = innerPadding,
                         onProductClick = onProductClick,
                         onAddToCart = { product -> viewModel.addProductToCart(product) }
@@ -215,6 +218,8 @@ private fun SearchTextField(
 @Composable
 private fun ProductGrid(
     pagingItems: LazyPagingItems<Product>,
+    searchResults: List<Product>?,
+    isSearchActive: Boolean,
     contentPadding: PaddingValues,
     onProductClick: (Int) -> Unit,
     onAddToCart: (Product) -> Unit,
@@ -233,24 +238,38 @@ private fun ProductGrid(
             CatalogHeader()
         }
 
-        items(
-            count = pagingItems.itemCount,
-            key = pagingItems.itemKey { it.id },
-            contentType = pagingItems.itemContentType { "Product" }
-        ) { index ->
-            val product = pagingItems[index]
-            if (product != null) {
+        // Lógica condicional quirúrgica para cambiar entre búsqueda y catálogo normal
+        if (isSearchActive && searchResults != null) {
+            items(
+                items = searchResults,
+                key = { it.id }
+            ) { product ->
                 ProductCard(
                     product = product,
                     onClick = { onProductClick(product.id) },
                     onAddToCart = onAddToCart
                 )
             }
-        }
+        } else {
+            items(
+                count = pagingItems.itemCount,
+                key = pagingItems.itemKey { it.id },
+                contentType = pagingItems.itemContentType { "Product" }
+            ) { index ->
+                val product = pagingItems[index]
+                if (product != null) {
+                    ProductCard(
+                        product = product,
+                        onClick = { onProductClick(product.id) },
+                        onAddToCart = onAddToCart
+                    )
+                }
+            }
 
-        if (pagingItems.loadState.append is LoadState.Loading) {
-            items(InterCommerceStyles.SKELETON_ITEM_COUNT) {
-                ProductCardSkeleton()
+            if (pagingItems.loadState.append is LoadState.Loading) {
+                items(InterCommerceStyles.SKELETON_ITEM_COUNT) {
+                    ProductCardSkeleton()
+                }
             }
         }
     }
